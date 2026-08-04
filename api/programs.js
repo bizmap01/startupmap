@@ -27,9 +27,9 @@ function pick(obj, keys) {
 }
 function normalizeAnnouncement(raw) {
   return {
-    title:   pick(raw, ['biz_pbanc_nm','intg_pbanc_biz_nm','pbanc_nm','title']),
+    title:   pick(raw, ['biz_pbanc_nm','intg_pbanc_biz_nm','supt_biz_titl_nm','pbanc_nm','title']),
     org:     pick(raw, ['pbanc_ntrp_nm','sprv_inst','excInsttNm','org']),
-    target:  pick(raw, ['aply_trgt_ctnt','aply_trgt','target']),
+    target:  pick(raw, ['aply_trgt_ctnt','aply_trgt','biz_supt_trgt_info','target']),
     field:   pick(raw, ['supt_biz_clsfc','biz_category_cd','field']),
     region:  pick(raw, ['supt_regin','region']),
     open:    String(pick(raw, ['rcrt_prgs_yn','open'])).toUpperCase() === 'Y',
@@ -92,9 +92,12 @@ function buildResult(announcements, flagships, cond, opts = {}) {
     .sort((a, b) => b.score - a.score);
   const picked = []; const seen = new Set();
   const push = (p) => { const k = p.title || p.url; if (!k || seen.has(k)) return; seen.add(k); picked.push(p); };
-  scored.slice(0, topN - 1).forEach(push);
-  flag.slice(0, 2).forEach(push);
-  scored.slice(topN - 1).forEach(push);
+  const flagN = Math.min(2, flag.length);       // 대표 사업 최소 확보 수
+  const openSlots = topN - flagN;               // 접수중에 줄 자리
+  scored.slice(0, openSlots).forEach(push);     // 접수중 우선
+  flag.slice(0, flagN).forEach(push);           // 대표 사업 2개 확보
+  scored.slice(openSlots).forEach(push);        // 접수중 남으면 더 채움
+  flag.slice(flagN).forEach(push);              // 대표 남으면 더 채움 (접수중 적을 때)
   return picked.slice(0, topN).map((p, i) => ({
     rank: i + 1, title: p.title, org: p.org, fit: p.fit, daysLeft: p.daysLeft,
     endDt: p.endDt, region: p.region, open: p.open, flagship: p.flagship,
