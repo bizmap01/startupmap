@@ -1,9 +1,13 @@
-// api/programs.js  —  STARTUPMAP 추천 엔진 (단일 파일)
-// 프론트(진단 결과)는 이 함수 하나만 호출한다. data.go.kr 인증키는 서버에만 존재.
+// api/programs.js  —  STARTUPMAP 추천 엔진
+// 결과를 두 묶음으로 반환한다:
+//   open     = 현재 접수 가능한 실시간 공고 5개 (전국/지역 구분)
+//   flagship = 진단(단계+필요항목) 맞춤 대표 창업지원사업 3개 (큐레이션)
+// data.go.kr 인증키는 서버(process.env)에만 존재.
 
 const SERVICE_URL = 'https://apis.data.go.kr/B552735/kisedKstartupService01';
+const KS = 'https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do';
 
-// 진단 분야 → 공고 텍스트에서 찾을 키워드
+// ── 진단 분야 → 공고 텍스트에서 찾을 키워드 ──
 const FIELD_KEYWORDS = {
   'IT':    ['IT','정보통신','소프트웨어','ICT','플랫폼','앱','디지털','AI','인공지능','데이터','SaaS'],
   '제조':  ['제조','생산','스마트공장','하드웨어','소재','부품','장비','메이커'],
@@ -19,103 +23,98 @@ const STAGE_KEYWORDS = {
   '도약기': ['도약','스케일업','글로벌','성장','점프업'],
 };
 
-function pick(obj, keys) {
-  for (const k of keys) {
-    if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') return obj[k];
-  }
-  return '';
-}
-function normalizeAnnouncement(raw) {
-  return {
-    title:   pick(raw, ['biz_pbanc_nm','intg_pbanc_biz_nm','supt_biz_titl_nm','pbanc_nm','title']),
-    org:     pick(raw, ['pbanc_ntrp_nm','sprv_inst','excInsttNm','org']),
-    target:  pick(raw, ['aply_trgt_ctnt','aply_trgt','biz_supt_trgt_info','target']),
-    field:   pick(raw, ['supt_biz_clsfc','biz_category_cd','field']),
-    region:  pick(raw, ['supt_regin','region']),
-    open:    String(pick(raw, ['rcrt_prgs_yn','open'])).toUpperCase() === 'Y',
-    startDt: pick(raw, ['pbanc_rcpt_bgng_dt','startDt']),
-    endDt:   pick(raw, ['pbanc_rcpt_end_dt','endDt']),
-    url:     pick(raw, ['detl_pg_url','biz_gdnc_url','url']),
-    flagship: !!raw._flagship,
-    _raw: raw,
-  };
-}
-function parseDt(s) {
-  if (!s) return null;
-  const d = String(s).replace(/[^0-9]/g, '');
-  if (d.length < 8) return null;
-  return new Date(+d.slice(0,4), +d.slice(4,6)-1, +d.slice(6,8));
-}
-function daysLeft(endDt, now = new Date()) {
-  const e = parseDt(endDt);
-  if (!e) return null;
-  return Math.ceil((e - now) / 86400000);
-}
-function countHits(text, words) {
-  const t = (text || '').toLowerCase();
-  let n = 0;
-  for (const w of words) if (t.includes(w.toLowerCase())) n++;
-  return n;
-}
-function scoreProgram(p, cond, now = new Date()) {
-  const hay = `${p.title} ${p.target} ${p.field}`;
-  let score = 0; const reasons = [];
-  if (p.open) { score += 40; reasons.push('접수중'); }
-  let fieldHits = 0;
-  for (const f of (cond.fields || [])) fieldHits += countHits(hay, FIELD_KEYWORDS[f] || [f]);
-  if (fieldHits > 0) { score += Math.min(30, fieldHits * 12); reasons.push('분야 적합'); }
-  const stageHits = countHits(hay, STAGE_KEYWORDS[cond.stage] || []);
-  if (stageHits > 0) { score += Math.min(20, stageHits * 12); reasons.push('단계 적합'); }
-  const dl = daysLeft(p.endDt, now);
-  if (dl !== null && dl >= 0 && dl <= 14) { score += 10; reasons.push('마감 임박'); }
-  if (cond.region && p.region && p.region.includes(cond.region)) { score += 5; reasons.push('지역 적합'); }
-  if (p.flagship) { score += 25; reasons.push('대표 사업'); }
-  const fit = Math.max(35, Math.min(99, Math.round(score)));
-  return { ...p, score, fit, daysLeft: dl, reasons };
-}
-function isNotClosed(p, now = new Date()) {
-  const dl = daysLeft(p.endDt, now);
-  return dl === null || dl >= 0;
-}
-function buildResult(announcements, flagships, cond, opts = {}) {
-  const now = opts.now || new Date();
-  const topN = opts.topN || 5;
-  const scored = announcements
-    .map(normalizeAnnouncement)
-    .filter(p => isNotClosed(p, now))
-    .filter(p => !cond.region || !p.region || p.region.includes('전국') || p.region.includes(cond.region))
-    .map(p => scoreProgram(p, cond, now))
-    .sort((a, b) => b.score - a.score);
-  const flag = (flagships || [])
-    .map(r => normalizeAnnouncement({ ...r, _flagship: true }))
-    .map(p => scoreProgram(p, cond, now))
-    .sort((a, b) => b.score - a.score);
-  const picked = []; const seen = new Set();
-  const push = (p) => { const k = p.title || p.url; if (!k || seen.has(k)) return; seen.add(k); picked.push(p); };
-  const flagN = Math.min(2, flag.length);       // 대표 사업 최소 확보 수
-  const openSlots = topN - flagN;               // 접수중에 줄 자리
-  scored.slice(0, openSlots).forEach(push);     // 접수중 우선
-  flag.slice(0, flagN).forEach(push);           // 대표 사업 2개 확보
-  scored.slice(openSlots).forEach(push);        // 접수중 남으면 더 채움
-  flag.slice(flagN).forEach(push);              // 대표 남으면 더 채움 (접수중 적을 때)
-  return picked.slice(0, topN).map((p, i) => ({
-    rank: i + 1, title: p.title, org: p.org, fit: p.fit, daysLeft: p.daysLeft,
-    endDt: p.endDt, region: p.region, open: p.open, flagship: p.flagship,
-    reasons: p.reasons, url: p.url,
+// ── ② 대표 창업지원사업 (큐레이션) : 단계 + 니즈 태그로 매칭 ──
+// stages: 예비/초기/성장기/도약기, needs: fund자금/mentor멘토링/invest2투자/global글로벌/space공간/market마케팅
+const FLAGSHIPS = [
+  { title:'예비창업패키지',            org:'중소벤처기업부·창업진흥원', scale:'최대 1억원',  stages:['예비'],                 needs:['fund'],            desc:'예비창업자 사업화 자금·멘토링' },
+  { title:'초기창업패키지',            org:'중소벤처기업부·창업진흥원', scale:'최대 1억원',  stages:['초기'],                 needs:['fund'],            desc:'3년 이내 창업기업 사업화 지원' },
+  { title:'창업도약패키지',            org:'중소벤처기업부·창업진흥원', scale:'최대 3억원',  stages:['성장기','도약기'],       needs:['fund','market'],   desc:'3~7년 도약기 사업화·성장 지원' },
+  { title:'창업성장기술개발사업(디딤돌)',org:'중소벤처기업부',           scale:'최대 1.2억원',stages:['예비','초기','성장기'],  needs:['fund'],            desc:'창업기업 R&D 자금 지원' },
+  { title:'창업성장기술개발사업(전략형)',org:'중소벤처기업부',           scale:'최대 6억원',  stages:['성장기','도약기'],       needs:['fund'],            desc:'성장기 기업 전략형 R&D' },
+  { title:'TIPS 프로그램',            org:'중소벤처기업부·TIPS 운영사', scale:'최대 5억원',  stages:['초기','성장기','도약기'], needs:['invest2'],         desc:'민간투자 주도형 기술창업 R&D' },
+  { title:'창업사관학교',              org:'중소벤처기업부·창업진흥원', scale:'최대 1억원',  stages:['초기','성장기'],         needs:['mentor','space'],  desc:'유망 창업자 집중 보육·사업화' },
+  { title:'IP나래 프로그램',           org:'특허청·한국발명진흥회',     scale:'IP 전략 컨설팅', stages:['예비','초기','성장기','도약기'], needs:['mentor'],   desc:'창업기업 지식재산 전략 컨설팅' },
+  { title:'아기유니콘200',            org:'중소벤처기업부',           scale:'최대 3억원+', stages:['도약기'],               needs:['invest2','global'],desc:'유망 스타트업 스케일업·글로벌' },
+  { title:'글로벌 창업사관학교',       org:'중소벤처기업부·창업진흥원', scale:'글로벌 진출 지원', stages:['초기','성장기'],     needs:['global'],          desc:'글로벌 지향 창업기업 육성' },
+];
+
+function pickFlagships(cond, topN = 3) {
+  const scored = FLAGSHIPS.map(f => {
+    let s = 0; const why = [];
+    if (f.stages.includes(cond.stage)) { s += 10; why.push('단계 적합'); }
+    const need = (cond.needs || []).filter(n => f.needs.includes(n));
+    if (need.length) { s += need.length * 8; why.push('필요항목 적합'); }
+    return { ...f, _score: s, why };
+  });
+  // 점수 높은 순, 동점이면 원래 순서 유지
+  scored.sort((a, b) => b._score - a._score);
+  return scored.slice(0, topN).map(f => ({
+    title: f.title, org: f.org, scale: f.scale, desc: f.desc,
+    reasons: f.why.length ? f.why : ['대표 사업'], url: KS,
   }));
 }
 
-const soon = (d) => { const x = new Date(Date.now() + d*86400000); return `${x.getFullYear()}${String(x.getMonth()+1).padStart(2,'0')}${String(x.getDate()).padStart(2,'0')}`; };
-const MOCK_ANNOUNCEMENTS = [
-  { biz_pbanc_nm:'초기창업패키지 예비창업자 모집', pbanc_ntrp_nm:'창업진흥원', aply_trgt_ctnt:'예비창업자 및 3년 이내 초기창업기업', supt_biz_clsfc:'사업화', supt_regin:'전국', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(10), detl_pg_url:'https://www.k-startup.go.kr' },
-  { biz_pbanc_nm:'푸드테크 스마트팜 창업 지원사업', pbanc_ntrp_nm:'농식품부', aply_trgt_ctnt:'푸드테크·농식품 초기창업기업', supt_biz_clsfc:'사업화', supt_regin:'서울', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(25), detl_pg_url:'https://www.k-startup.go.kr' },
-  { biz_pbanc_nm:'AI 소프트웨어 R&D 바우처', pbanc_ntrp_nm:'정보통신산업진흥원', aply_trgt_ctnt:'ICT·인공지능 분야 창업기업', supt_biz_clsfc:'기술개발(R&D)', supt_regin:'전국', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(40), detl_pg_url:'https://www.k-startup.go.kr' },
-  { biz_pbanc_nm:'콘텐츠 크리에이터 창업 도약 프로그램', pbanc_ntrp_nm:'콘텐츠진흥원', aply_trgt_ctnt:'콘텐츠·미디어 도약기 기업', supt_biz_clsfc:'멘토링', supt_regin:'부산', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(6), detl_pg_url:'https://www.k-startup.go.kr' },
-  { biz_pbanc_nm:'제조 스마트공장 구축 지원', pbanc_ntrp_nm:'중기부', aply_trgt_ctnt:'제조·하드웨어 중소기업', supt_biz_clsfc:'시설', supt_regin:'경기', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(55), detl_pg_url:'https://www.k-startup.go.kr' },
-];
-const MOCK_FLAGSHIPS = [
-  { biz_pbanc_nm:'예비창업패키지', pbanc_ntrp_nm:'중소벤처기업부', aply_trgt_ctnt:'예비창업자', supt_biz_clsfc:'사업화', supt_regin:'전국', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(30), detl_pg_url:'https://www.k-startup.go.kr' },
-  { biz_pbanc_nm:'창업도약패키지', pbanc_ntrp_nm:'중소벤처기업부', aply_trgt_ctnt:'3~7년 도약기 창업기업', supt_biz_clsfc:'사업화', supt_regin:'전국', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(35), detl_pg_url:'https://www.k-startup.go.kr' },
+// ── 순수 매칭 로직 (접수 공고용) ──
+function pick(obj, keys) {
+  for (const k of keys) if (obj[k] != null && String(obj[k]).trim() !== '') return obj[k];
+  return '';
+}
+function normalize(raw) {
+  return {
+    title:  pick(raw, ['biz_pbanc_nm','intg_pbanc_biz_nm','pbanc_nm']),
+    org:    pick(raw, ['pbanc_ntrp_nm','sprv_inst','excInsttNm']),
+    target: pick(raw, ['aply_trgt_ctnt','aply_trgt']),
+    field:  pick(raw, ['supt_biz_clsfc','biz_category_cd']),
+    region: pick(raw, ['supt_regin']),
+    open:   String(pick(raw, ['rcrt_prgs_yn'])).toUpperCase() === 'Y',
+    endDt:  pick(raw, ['pbanc_rcpt_end_dt']),
+    url:    pick(raw, ['detl_pg_url','biz_gdnc_url']),
+  };
+}
+function parseDt(s){ const d=String(s||'').replace(/[^0-9]/g,''); return d.length>=8?new Date(+d.slice(0,4),+d.slice(4,6)-1,+d.slice(6,8)):null; }
+function daysLeft(e,now=new Date()){ const d=parseDt(e); return d?Math.ceil((d-now)/86400000):null; }
+function hits(t,ws){ t=(t||'').toLowerCase(); let n=0; for(const w of ws) if(t.includes(w.toLowerCase())) n++; return n; }
+
+function scoreOpen(p, cond, now = new Date()) {
+  const hay = `${p.title} ${p.target} ${p.field}`;
+  let score = 0; const reasons = [];
+  if (p.open) { score += 40; reasons.push('접수중'); }
+  let fh = 0; for (const f of (cond.fields||[])) fh += hits(hay, FIELD_KEYWORDS[f]||[f]);
+  if (fh) { score += Math.min(30, fh*12); reasons.push('분야 적합'); }
+  const sh = hits(hay, STAGE_KEYWORDS[cond.stage]||[]);
+  if (sh) { score += Math.min(20, sh*12); reasons.push('단계 적합'); }
+  const dl = daysLeft(p.endDt, now);
+  if (dl!=null && dl>=0 && dl<=14) { score += 10; reasons.push('마감 임박'); }
+  const nationwide = !p.region || p.region.includes('전국');
+  if (cond.region && p.region && p.region.includes(cond.region)) { score += 5; reasons.push('지역 적합'); }
+  const fit = Math.max(35, Math.min(99, Math.round(score)));
+  return { ...p, fit, daysLeft: dl, regionType: nationwide ? '전국' : '지역', reasons };
+}
+
+function buildOpen(announcements, cond, opts = {}) {
+  const now = opts.now || new Date();
+  const topN = opts.topN || 5;
+  return announcements
+    .map(normalize)
+    .filter(p => { const dl = daysLeft(p.endDt, now); return dl == null || dl >= 0; })
+    .filter(p => !cond.region || !p.region || p.region.includes('전국') || p.region.includes(cond.region))
+    .map(p => scoreOpen(p, cond, now))
+    .sort((a, b) => b.fit - a.fit)
+    .slice(0, topN)
+    .map((p, i) => ({
+      rank: i+1, title: p.title, org: p.org, fit: p.fit, daysLeft: p.daysLeft,
+      endDt: p.endDt, region: p.region, regionType: p.regionType, reasons: p.reasons, url: p.url,
+    }));
+}
+
+// ── 개발용 샘플 ──
+const soon = (d)=>{ const x=new Date(Date.now()+d*86400000); return `${x.getFullYear()}${String(x.getMonth()+1).padStart(2,'0')}${String(x.getDate()).padStart(2,'0')}`; };
+const MOCK = [
+  { biz_pbanc_nm:'초기창업패키지 예비창업자 모집', pbanc_ntrp_nm:'창업진흥원', aply_trgt_ctnt:'예비·초기창업기업', supt_biz_clsfc:'사업화', supt_regin:'전국', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(10), detl_pg_url:KS },
+  { biz_pbanc_nm:'푸드테크 스마트팜 창업 지원', pbanc_ntrp_nm:'농식품부', aply_trgt_ctnt:'푸드테크 창업기업', supt_biz_clsfc:'사업화', supt_regin:'서울', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(25), detl_pg_url:KS },
+  { biz_pbanc_nm:'AI 소프트웨어 R&D 바우처', pbanc_ntrp_nm:'정보통신산업진흥원', aply_trgt_ctnt:'ICT·AI 창업기업', supt_biz_clsfc:'R&D', supt_regin:'전국', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(40), detl_pg_url:KS },
+  { biz_pbanc_nm:'콘텐츠 창업 도약 프로그램', pbanc_ntrp_nm:'콘텐츠진흥원', aply_trgt_ctnt:'콘텐츠 도약기 기업', supt_biz_clsfc:'멘토링', supt_regin:'부산', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(6), detl_pg_url:KS },
+  { biz_pbanc_nm:'제조 스마트공장 구축 지원', pbanc_ntrp_nm:'중기부', aply_trgt_ctnt:'제조 중소기업', supt_biz_clsfc:'시설', supt_regin:'경기', rcrt_prgs_yn:'Y', pbanc_rcpt_end_dt:soon(55), detl_pg_url:KS },
 ];
 
 async function callKStartup(op, params = {}) {
@@ -127,16 +126,12 @@ async function callKStartup(op, params = {}) {
   url.searchParams.set('page', String(params.page || 1));
   url.searchParams.set('perPage', String(params.perPage || 100));
   for (const [k, v] of Object.entries(params.extra || {})) {
-    if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
+    if (v != null && v !== '') url.searchParams.set(k, String(v));
   }
   const r = await fetch(url, { headers: { Accept: 'application/json' } });
   const text = await r.text();
-  let json;
-  try { json = JSON.parse(text); }
-  catch { throw new Error(`NOT_JSON: ${text.slice(0, 200)}`); }
-  if (json.resultCode && String(json.resultCode) !== '00') {
-    throw new Error(`UPSTREAM ${json.resultCode}: ${json.resultMsg || ''}`);
-  }
+  let json; try { json = JSON.parse(text); } catch { throw new Error(`NOT_JSON: ${text.slice(0,200)}`); }
+  if (json.resultCode && String(json.resultCode) !== '00') throw new Error(`UPSTREAM ${json.resultCode}: ${json.resultMsg||''}`);
   return Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
 }
 
@@ -144,31 +139,27 @@ module.exports = async function handler(req, res) {
   const q = req.query || {};
   const cond = {
     stage: q.stage || '',
-    fields: (q.fields ? String(q.fields).split(',') : []).map(s => s.trim()).filter(Boolean),
+    fields: (q.fields ? String(q.fields).split(',') : []).map(s=>s.trim()).filter(Boolean),
+    needs:  (q.needs  ? String(q.needs).split(',')  : []).map(s=>s.trim()).filter(Boolean),
     region: q.region || '',
   };
-  const topN = Math.min(10, Math.max(1, parseInt(q.topN) || 5));
+  const flagship = pickFlagships(cond, 3);
   try {
     if (q.mock === '1' || (!process.env.DATA_GO_KR_API_KEY && q.live !== '1')) {
-      const result = buildResult(MOCK_ANNOUNCEMENTS, MOCK_FLAGSHIPS, cond, { topN });
-      return res.status(200).json({ source: 'mock', cond, count: result.length, programs: result });
+      return res.status(200).json({ source:'mock', cond, open: buildOpen(MOCK, cond, {topN:5}), flagship });
     }
-    const [ann, flag] = await Promise.all([
-      callKStartup('getAnnouncementInformation01', { perPage: 200, extra: { rcrt_prgs_yn: 'Y' } }),
-      callKStartup('getBusinessInformation01',     { perPage: 60 }),
-    ]);
-    if (q.debug === '1') {
-      return res.status(200).json({ annSample: ann[0] || null, flagSample: flag[0] || null });
-    }
-    const result = buildResult(ann, flag, cond, { topN });
+    const ann = await callKStartup('getAnnouncementInformation01', { perPage: 200, extra: { rcrt_prgs_yn: 'Y' } });
+    if (q.debug === '1') return res.status(200).json({ annSample: ann[0] || null });
+    const open = buildOpen(ann, cond, { topN: 5 });
     res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate');
-    return res.status(200).json({ source: 'k-startup', cond, count: result.length, programs: result });
+    return res.status(200).json({ source:'k-startup', cond, open, flagship });
   } catch (e) {
     const msg = String(e.message || e);
     const hint =
       msg === 'NO_KEY' ? 'Vercel 환경변수 DATA_GO_KR_API_KEY 를 설정하세요.' :
       msg.startsWith('UPSTREAM') ? '키/활용신청/IP/호출한도를 확인하세요.' :
       msg.startsWith('NOT_JSON') ? 'returnType/파라미터를 확인하세요.' : '';
-    return res.status(502).json({ error: msg, hint });
+    // 공고 호출이 실패해도 대표 사업은 항상 제공
+    return res.status(200).json({ source:'flagship-only', cond, open: [], flagship, warn: msg, hint });
   }
 };
