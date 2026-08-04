@@ -210,6 +210,8 @@ nav{
 .agree-wrap input{accent-color:var(--primary);width:16px;height:16px;flex-shrink:0;margin-top:1px}
 .agree-text{font-size:12px;color:var(--tx2);line-height:1.5}
 .agree-group{display:flex;flex-direction:column;gap:10px}
+.grant-loading{text-align:center;color:var(--tx3);font-size:13px;padding:26px 10px}
+.gc-link{text-decoration:none;background:rgba(255,107,53,.14)!important;color:var(--primary)!important}
 .agree-all{border-color:var(--bd2)!important;background:var(--card2)!important}
 .agree-detail{margin-top:6px}
 .agree-detail summary{font-size:11px;color:var(--tx3);cursor:pointer;list-style:none;padding:3px 2px}
@@ -726,120 +728,7 @@ nav{
   <!-- 지원사업 샘플 -->
   <div class="section-title">🎯 추천 지원사업 <span class="badge-count">TOP 5</span></div>
 
-  <div class="grant-card">
-    <div class="gc-top">
-      <div class="gc-rank">1</div>
-      <div class="gc-name">창업성장기술개발사업 (디딤돌)</div>
-      <div class="gc-right">
-        <div class="gc-amt">최대 1억원</div>
-        <div class="gc-prob prob-h">선정 높음</div>
-      </div>
-    </div>
-    <div class="gc-agency">중소벤처기업부 / 창업진흥원</div>
-    <div class="gc-desc">💡 초기창업 IT·제조 기업 R&D 자금 지원</div>
-    <div class="gc-meta">
-      <div class="gc-meta-item">마감 <span>2026.08.31</span></div>
-      <div class="gc-meta-item">경쟁률 <span>약 4:1</span></div>
-      <div class="gc-meta-item">자부담 <span>25%</span></div>
-    </div>
-    <div class="gc-tags">
-      <span class="gc-tag">창업 3년 이내</span>
-      <span class="gc-tag">R&D</span>
-      <span class="gc-tag">기술개발</span>
-    </div>
-  </div>
-
-  <div class="grant-card">
-    <div class="gc-top">
-      <div class="gc-rank">2</div>
-      <div class="gc-name">TIPS 프로그램 (민간투자주도형 기술창업)</div>
-      <div class="gc-right">
-        <div class="gc-amt">최대 5억원</div>
-        <div class="gc-prob prob-m">선정 보통</div>
-      </div>
-    </div>
-    <div class="gc-agency">중소벤처기업부 / TIPS 운영사</div>
-    <div class="gc-desc">💡 민간 투자 + 정부 R&D 매칭 지원</div>
-    <div class="gc-meta">
-      <div class="gc-meta-item">마감 <span>상시</span></div>
-      <div class="gc-meta-item">경쟁률 <span>약 8:1</span></div>
-      <div class="gc-meta-item">자부담 <span>0%</span></div>
-    </div>
-    <div class="gc-tags">
-      <span class="gc-tag">딥테크</span>
-      <span class="gc-tag">투자연계</span>
-      <span class="gc-tag">최대 5억</span>
-    </div>
-  </div>
-
-  <div class="grant-card">
-    <div class="gc-top">
-      <div class="gc-rank">3</div>
-      <div class="gc-name">초기창업패키지</div>
-      <div class="gc-right">
-        <div class="gc-amt">최대 1억원</div>
-        <div class="gc-prob prob-h">선정 높음</div>
-      </div>
-    </div>
-    <div class="gc-agency">중소벤처기업부 / 창업진흥원</div>
-    <div class="gc-desc">💡 창업 3년 이내 기업 사업화 자금 지원</div>
-    <div class="gc-meta">
-      <div class="gc-meta-item">마감 <span>2026.07.31</span></div>
-      <div class="gc-meta-item">경쟁률 <span>약 5:1</span></div>
-      <div class="gc-meta-item">자부담 <span>30%</span></div>
-    </div>
-    <div class="gc-tags">
-      <span class="gc-tag">창업 3년 이내</span>
-      <span class="gc-tag">사업화</span>
-      <span class="gc-tag">멘토링</span>
-    </div>
-  </div>
-
-  <div class="grant-card">
-    <div class="gc-top">
-      <div class="gc-rank">4</div>
-      <div class="gc-name">비대면 서비스 바우처</div>
-      <div class="gc-right">
-        <div class="gc-amt">최대 2,000만원</div>
-        <div class="gc-prob prob-m">선정 보통</div>
-      </div>
-    </div>
-    <div class="gc-agency">중소벤처기업부</div>
-    <div class="gc-desc">💡 클라우드·보안·AI 솔루션 구축비 지원</div>
-    <div class="gc-meta">
-      <div class="gc-meta-item">마감 <span>공고 확인</span></div>
-      <div class="gc-meta-item">경쟁률 <span>약 2.5:1</span></div>
-      <div class="gc-meta-item">자부담 <span>20%</span></div>
-    </div>
-    <div class="gc-tags">
-      <span class="gc-tag">디지털전환</span>
-      <span class="gc-tag">클라우드</span>
-      <span class="gc-tag">AI</span>
-    </div>
-  </div>
-
-  <div class="grant-card">
-    <div class="gc-top">
-      <div class="gc-rank">5</div>
-      <div class="gc-name">스타트업 글로벌 진출 지원</div>
-      <div class="gc-right">
-        <div class="gc-amt">최대 2,000만원</div>
-        <div class="gc-prob prob-l">선정 낮음</div>
-      </div>
-    </div>
-    <div class="gc-agency">KOTRA</div>
-    <div class="gc-desc">💡 해외 전시회·법인설립 비용 지원</div>
-    <div class="gc-meta">
-      <div class="gc-meta-item">마감 <span>공고 확인</span></div>
-      <div class="gc-meta-item">경쟁률 <span>약 2.8:1</span></div>
-      <div class="gc-meta-item">자부담 <span>20%</span></div>
-    </div>
-    <div class="gc-tags">
-      <span class="gc-tag">글로벌</span>
-      <span class="gc-tag">수출</span>
-      <span class="gc-tag">해외진출</span>
-    </div>
-  </div>
+  <div id="grantList"><div class="grant-loading">공고를 불러오는 중…</div></div>
 
   <!-- 점수 -->
   <div class="section-title" style="margin-top:20px">📊 항목별 적합도</div>
@@ -1192,6 +1081,7 @@ function startAnalysis(){
     buildRoadmap();
     updateCtaAmount();
     document.getElementById('result').style.display='block';
+    renderPrograms();
     window.scrollTo(0,0);
   }, 11000);
 }
@@ -1200,6 +1090,63 @@ function resetDiag(){
   document.getElementById('result').style.display='none';
   document.getElementById('landing').style.display='block';
   window.scrollTo(0,0);
+}
+
+// ── 진단 코드 → API가 쓰는 한글 라벨 ──
+var STAGE_MAP = { pre:'예비', early:'초기', growth:'성장기', scale:'도약기' };
+var FIELD_MAP = { it:'IT', hw:'제조', bio:'바이오', food:'푸드테크', content:'콘텐츠', social:'소셜' };
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function fmtDate(d){ var x=String(d||'').replace(/[^0-9]/g,''); return x.length>=8 ? x.slice(0,4)+'.'+x.slice(4,6)+'.'+x.slice(6,8) : '공고 확인'; }
+function ddayText(dl){ if(dl==null) return '상시'; if(dl<0) return '마감'; if(dl===0) return '오늘 마감'; return 'D-'+dl; }
+function fixUrl(u){ if(!u) return '#'; return /^https?:\/\//.test(u) ? u : 'https://'+u; }
+function probOf(fit){ if(fit>=80) return {c:'prob-h',t:'선정 높음'}; if(fit>=60) return {c:'prob-m',t:'선정 보통'}; return {c:'prob-l',t:'선정 낮음'}; }
+
+function programCard(p){
+  var pr=probOf(p.fit);
+  var tags=(p.reasons||[]).slice(0,3).map(function(r){return '<span class="gc-tag">'+esc(r)+'</span>';}).join('');
+  var flag=p.flagship?'<span class="gc-tag" style="background:rgba(124,92,252,.15);color:#a48bff">대표사업</span>':'';
+  return ''+
+  '<div class="grant-card">'+
+    '<div class="gc-top">'+
+      '<div class="gc-rank">'+p.rank+'</div>'+
+      '<div class="gc-name">'+esc(p.title||'제목 미확인')+'</div>'+
+      '<div class="gc-right">'+
+        '<div class="gc-amt">적합도 '+p.fit+'%</div>'+
+        '<div class="gc-prob '+pr.c+'">'+pr.t+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="gc-agency">'+esc(p.org||'주관기관 확인')+'</div>'+
+    '<div class="gc-desc">💡 '+esc((p.reasons||[]).join(' · ')||'조건 매칭 공고')+'</div>'+
+    '<div class="gc-meta">'+
+      '<div class="gc-meta-item">마감 <span>'+ddayText(p.daysLeft)+'</span></div>'+
+      '<div class="gc-meta-item">'+fmtDate(p.endDt)+'</div>'+
+      '<div class="gc-meta-item">지역 <span>'+esc(p.region||'전국')+'</span></div>'+
+    '</div>'+
+    '<div class="gc-tags">'+flag+tags+
+      '<a class="gc-tag gc-link" href="'+fixUrl(p.url)+'" target="_blank" rel="noopener">공고 보기 ↗</a>'+
+    '</div>'+
+  '</div>';
+}
+
+function renderPrograms(){
+  var box=document.getElementById('grantList');
+  if(!box) return;
+  var stageKo = STAGE_MAP[S.stage] || '';
+  var fieldsKo = (S.fields||[]).map(function(f){return FIELD_MAP[f]||f;}).join(',');
+  var qs='stage='+encodeURIComponent(stageKo)+'&fields='+encodeURIComponent(fieldsKo)+'&region='+encodeURIComponent(S.region||'')+'&topN=5';
+  box.innerHTML='<div class="grant-loading">공고를 불러오는 중…</div>';
+  fetch('/api/programs?'+qs)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var list=(data && data.programs) || [];
+      if(!list.length){ box.innerHTML='<div class="grant-loading">조건에 맞는 접수중 공고를 찾지 못했어요. 잠시 후 다시 시도해 주세요.</div>'; return; }
+      box.innerHTML=list.map(programCard).join('');
+      var t=document.getElementById('rTotal'); if(t) t.textContent=list.length+'개';
+    })
+    .catch(function(){
+      box.innerHTML='<div class="grant-loading">공고를 불러오지 못했어요. (배포된 사이트에서 확인해 주세요)</div>';
+    });
 }
 </script>
 </body>
