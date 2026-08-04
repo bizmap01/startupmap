@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STARTUPMAP — 창업 지원사업 진단 시안</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* 팔레트: 새벽 하늘 → 오렌지 새벽빛 */
+  --bg:#0a0e1a;
+  --bg2:#0f1525;
+  --bg3:#141c30;
+  --card:#161e32;
+  --card2:#1c2540;
+  --primary:#ff6b35;      /* 오렌지 — 론칭·에너지 */
+  --primary2:#ff8c5a;
+  --accent:#00d4aa;       /* 민트 — 가능성·성장 */
+  --accent2:#00ebb8;
+  --purple:#7c5cfc;       /* 보라 — 창의·혁신 */
+  --tx:#f0f2ff;
+  --tx2:#8892b0;
+  --tx3:#4a5568;
+  --bd:rgba(255,255,255,.07);
+  --bd2:rgba(255,255,255,.12);
+  --r:14px;
+  --rs:8px;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--tx);
+  font-family:'Pretendard',sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── 공통 유틸 ── */
+.container{max-width:480px;margin:0 auto;padding:0 20px}
+.hidden{display:none!important}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 24px;border-radius:var(--r);font-size:15px;font-weight:700;
+  border:none;cursor:pointer;transition:all .2s;font-family:inherit;
+}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,107,53,.4)}
+.btn-ghost{background:transparent;color:var(--tx2);border:1.5px solid var(--bd2)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn-xl{padding:17px 32px;font-size:17px;width:100%}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;
+}
+
+/* ── 배경 그라디언트 오브 ── */
+.orb{
+  position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;
+}
+.orb1{width:500px;height:500px;background:rgba(255,107,53,.08);top:-100px;right:-100px}
+.orb2{width:400px;height:400px;background:rgba(0,212,170,.06);bottom:-80px;left:-80px}
+.orb3{width:300px;height:300px;background:rgba(124,92,252,.07);top:40%;left:50%;transform:translateX(-50%)}
+
+/* ── 네비 ── */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,14,26,.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--bd);
+  padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{font-size:19px;font-weight:900;letter-spacing:-.5px}
+.logo-start{color:var(--primary)}
+.logo-map{color:var(--tx)}
+.logo-sub{font-size:10px;font-weight:500;color:var(--tx3);letter-spacing:1.5px;margin-top:1px}
+.nav-badge{
+  background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.3);
+  color:var(--primary);font-size:11px;font-weight:700;
+  padding:4px 10px;border-radius:100px;
+}
+
+/* ── 랜딩 ── */
+#landing{
+  position:relative;z-index:1;
+  min-height:calc(100vh - 53px);
+  display:flex;flex-direction:column;
+  padding:0 0 40px;
+}
+.hero{
+  padding:48px 20px 32px;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;gap:16px;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.25);
+  color:var(--primary);font-size:12px;font-weight:600;
+  padding:6px 14px;border-radius:100px;
+}
+.hero-eyebrow::before{content:'🚀';font-size:13px}
+.hero-h1{
+  font-size:clamp(28px,7vw,36px);font-weight:900;
+  line-height:1.2;letter-spacing:-.5px;
+}
+.hero-h1 em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{font-size:14px;color:var(--tx2);line-height:1.7;max-width:320px}
+.hero-stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;
+  margin-top:8px;
+}
+.stat{
+  background:var(--card);border:1px solid var(--bd);border-radius:var(--r);
+  padding:14px 10px;text-align:center;
+}
+.stat-val{font-size:22px;font-weight:900;margin-bottom:2px}
+.stat-v1{color:var(--primary)}
+.stat-v2{color:var(--accent)}
+.stat-v3{color:var(--purple)}
+.stat-label{font-size:11px;color:var(--tx3)}
+.hero-cta{width:100%;margin-top:4px}
+
+/* 특징 카드 */
+.features{padding:0 20px;display:flex;flex-direction:column;gap:10px}
+.feat{
+  background:var(--card);border:1px solid var(--bd);border-radius:var(--r);
+  padding:16px;display:flex;align-items:center;gap:14px;
+}
+.feat-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+}
+.feat-i1{background:rgba(255,107,53,.12)}
+.feat-i2{background:rgba(0,212,170,.1)}
+.feat-i3{background:rgba(124,92,252,.1)}
+.feat-title{font-size:14px;font-weight:700;margin-bottom:2px}
+.feat-desc{font-size:12px;color:var(--tx2);line-height:1.5}
+
+/* ── 앱 (진단 폼) ── */
+#app{display:none;position:relative;z-index:1;padding-bottom:40px}
+
+/* 진행바 */
+.progress{padding:16px 20px 0}
+.prog-info{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--tx2)}
+.prog-bar{height:4px;background:var(--card2);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width .4s}
+
+/* 스텝 */
+.step{display:none;padding:24px 20px}
+.step.active{display:block}
+.step-label{
+  font-size:11px;font-weight:600;color:var(--primary);letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:8px;
+}
+.step-title{font-size:20px;font-weight:800;margin-bottom:6px;line-height:1.3}
+.step-hint{font-size:13px;color:var(--tx2);margin-bottom:24px;line-height:1.6}
+
+/* 선택 카드 그리드 */
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.choice-grid.col3{grid-template-columns:1fr 1fr 1fr}
+.choice{
+  background:var(--card);border:1.5px solid var(--bd);border-radius:var(--r);
+  padding:14px 12px;text-align:center;cursor:pointer;transition:all .2s;
+}
+.choice:hover{border-color:var(--primary);background:var(--card2)}
+.choice.selected{
+  border-color:var(--primary);background:rgba(255,107,53,.08);
+}
+.choice-icon{font-size:24px;margin-bottom:8px}
+.choice-label{font-size:13px;font-weight:600;color:var(--tx)}
+.choice-sub{font-size:11px;color:var(--tx3);margin-top:2px}
+
+/* 체크박스 리스트 */
+.check-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.check-item{
+  background:var(--card);border:1.5px solid var(--bd);border-radius:var(--rs);
+  padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;
+}
+.check-item:hover{border-color:var(--bd2)}
+.check-item.selected{border-color:var(--accent);background:rgba(0,212,170,.06)}
+.check-box{
+  width:20px;height:20px;border-radius:6px;border:1.5px solid var(--tx3);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;
+}
+.check-item.selected .check-box{background:var(--accent);border-color:var(--accent);color:#000;font-size:12px}
+.check-item.selected .check-box::after{content:'✓';font-weight:900}
+.check-text{font-size:13px;font-weight:500}
+
+/* 폼 인풋 */
+.form-group{margin-bottom:16px}
+.form-label{font-size:13px;font-weight:600;color:var(--tx2);margin-bottom:6px;display:block}
+.form-input{
+  width:100%;padding:13px 14px;background:var(--card);border:1.5px solid var(--bd);
+  border-radius:var(--rs);color:var(--tx);font-size:15px;font-family:inherit;outline:none;
+  transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--primary)}
+.form-input::placeholder{color:var(--tx3)}
+.agree-wrap{
+  display:flex;align-items:flex-start;gap:10px;
+  background:var(--card);border:1.5px solid var(--bd);border-radius:var(--rs);
+  padding:13px 14px;cursor:pointer;
+}
+.agree-wrap input{accent-color:var(--primary);width:16px;height:16px;flex-shrink:0;margin-top:1px}
+.agree-text{font-size:12px;color:var(--tx2);line-height:1.5}
+.agree-group{display:flex;flex-direction:column;gap:10px}
+.agree-all{border-color:var(--bd2)!important;background:var(--card2)!important}
+.agree-detail{margin-top:6px}
+.agree-detail summary{font-size:11px;color:var(--tx3);cursor:pointer;list-style:none;padding:3px 2px}
+.agree-detail summary::-webkit-details-marker{display:none}
+.agree-detail summary::before{content:"▸ "}
+.agree-detail[open] summary::before{content:"▾ "}
+.agree-detail-body{font-size:11px;color:var(--tx3);line-height:1.7;padding:4px 2px 2px}
+
+/* 네비 버튼 */
+.step-nav{display:flex;gap:10px;margin-top:8px}
+
+/* ── 로딩 ── */
+#loading{display:none;position:relative;z-index:1;min-height:calc(100vh - 53px)}
+.load-wrap{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:calc(100vh - 53px);padding:40px 20px;text-align:center;gap:24px;
+}
+.rocket-anim{font-size:56px;animation:rocket 2s ease-in-out infinite}
+@keyframes rocket{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-16px) rotate(10deg)}}
+.load-title{font-size:20px;font-weight:800}
+.load-sub{font-size:13px;color:var(--tx2);line-height:1.7}
+.load-steps{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px}
+.load-step{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border:1px solid var(--bd);border-radius:var(--rs);
+  padding:11px 14px;font-size:13px;
+}
+.load-step-icon{font-size:16px;width:28px;text-align:center}
+.load-bar{width:100%;max-width:300px;height:4px;background:var(--card2);border-radius:100px;overflow:hidden}
+.load-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:100px;animation:fill 11s linear forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+
+/* ── 결과 ── */
+#result{display:none;position:relative;z-index:1;padding:20px 20px 60px}
+.result-header{
+  background:linear-gradient(135deg,var(--card) 0%,var(--card2) 100%);
+  border:1px solid var(--bd2);border-radius:18px;padding:24px;margin-bottom:20px;
+}
+.result-company{font-size:18px;font-weight:800;margin-bottom:4px}
+.result-meta{font-size:12px;color:var(--tx3);margin-bottom:20px}
+.result-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.kpi{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:14px 10px;text-align:center}
+.kpi-val{font-size:22px;font-weight:900;margin-bottom:4px}
+.kv1{color:var(--primary)}
+.kv2{color:var(--accent)}
+.kv3{color:var(--purple)}
+.kpi-label{font-size:11px;color:var(--tx3)}
+
+/* 결과 요약 */
+.result-summary{
+  background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.2);
+  border-radius:var(--rs);padding:14px;font-size:13px;color:var(--tx2);
+  line-height:1.65;margin-bottom:20px;
+}
+
+/* 지원사업 카드 */
+.section-title{
+  font-size:16px;font-weight:800;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title .badge-count{
+  background:var(--primary);color:#fff;font-size:11px;
+  padding:2px 8px;border-radius:100px;font-weight:700;
+}
+.grant-card{
+  background:var(--card);border:1px solid var(--bd);border-radius:var(--r);
+  padding:16px;margin-bottom:12px;transition:border-color .2s;
+}
+.grant-card:hover{border-color:var(--bd2)}
+.gc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.gc-rank{
+  width:26px;height:26px;background:var(--primary);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.gc-name{font-size:14px;font-weight:700;flex:1;line-height:1.4}
+.gc-right{text-align:right;flex-shrink:0}
+.gc-amt{font-size:14px;font-weight:800;color:var(--primary);white-space:nowrap;margin-bottom:4px}
+.gc-prob{font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;white-space:nowrap}
+.prob-h{background:rgba(0,212,170,.12);color:var(--accent)}
+.prob-m{background:rgba(255,107,53,.12);color:var(--primary)}
+.prob-l{background:rgba(255,255,255,.06);color:var(--tx3)}
+.gc-agency{font-size:12px;color:var(--tx3);margin-bottom:8px}
+.gc-desc{
+  font-size:12px;color:var(--accent);background:rgba(0,212,170,.07);
+  padding:5px 10px;border-radius:6px;display:inline-block;margin-bottom:10px;
+}
+.gc-meta{display:flex;gap:12px;flex-wrap:wrap}
+.gc-meta-item{font-size:11px;color:var(--tx3)}
+.gc-meta-item span{color:var(--tx2);font-weight:500}
+.gc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.gc-tag{
+  background:var(--card2);border:1px solid var(--bd);
+  font-size:11px;color:var(--tx3);padding:3px 8px;border-radius:100px;
+}
+
+/* 점수 박스 */
+.score-box{
+  background:var(--card);border:1px solid var(--bd);border-radius:var(--r);
+  padding:18px;margin-bottom:12px;
+}
+.score-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.score-row:last-child{margin-bottom:0}
+.score-label{font-size:13px;color:var(--tx2);width:70px;flex-shrink:0}
+.score-bar{flex:1;height:6px;background:var(--card2);border-radius:100px;overflow:hidden}
+.score-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+.score-val{font-size:13px;font-weight:700;color:var(--primary);width:28px;text-align:right}
+
+/* 리스크 박스 */
+.risk-box{
+  background:var(--card);border:1px solid var(--bd);border-radius:var(--r);
+  padding:18px;margin-bottom:20px;
+}
+.risk-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px;border-radius:var(--rs);margin-bottom:8px;
+}
+.risk-item:last-child{margin-bottom:0}
+.risk-ok{background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.15)}
+.risk-warn{background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.15)}
+.risk-err{background:rgba(255,59,59,.07);border:1px solid rgba(255,59,59,.15)}
+.risk-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.risk-content .risk-title{font-size:13px;font-weight:700;margin-bottom:2px}
+.risk-content .risk-desc{font-size:12px;color:var(--tx2);line-height:1.5}
+
+/* CTA 박스 */
+.cta-box{
+  background:linear-gradient(135deg,rgba(255,107,53,.12),rgba(0,212,170,.08));
+  border:1px solid rgba(255,107,53,.25);border-radius:var(--r);
+  padding:20px;margin-bottom:20px;text-align:center;
+}
+.cta-title{font-size:16px;font-weight:800;margin-bottom:6px}
+.cta-desc{font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.6}
+.cta-btns{display:flex;gap:10px}
+
+/* ── 반응형 ── */
+@media(max-width:360px){
+  .hero-stats{grid-template-columns:1fr 1fr}
+  .result-kpis{grid-template-columns:1fr 1fr}
+}
+
+/* ── 로드맵 ── */
+.roadmap-wrap{margin-bottom:24px}
+.roadmap-title{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.roadmap{display:flex;flex-direction:column;gap:0;position:relative}
+.roadmap::before{
+  content:'';position:absolute;left:22px;top:28px;bottom:28px;
+  width:2px;background:linear-gradient(180deg,var(--primary),var(--accent),var(--purple));
+  border-radius:100px;z-index:0;
+}
+.rm-step{display:flex;gap:14px;align-items:flex-start;position:relative;z-index:1;margin-bottom:16px}
+.rm-step:last-child{margin-bottom:0}
+.rm-num{
+  width:46px;height:46px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+  border:2px solid var(--bg);
+  box-shadow:0 0 0 3px var(--bd2);
+}
+.rm-n1{background:rgba(255,107,53,.15);box-shadow:0 0 0 3px rgba(255,107,53,.25)}
+.rm-n2{background:rgba(0,212,170,.12);box-shadow:0 0 0 3px rgba(0,212,170,.2)}
+.rm-n3{background:rgba(124,92,252,.12);box-shadow:0 0 0 3px rgba(124,92,252,.2)}
+.rm-n4{background:rgba(255,200,50,.1);box-shadow:0 0 0 3px rgba(255,200,50,.18)}
+.rm-n5{background:rgba(59,130,246,.1);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+.rm-body{flex:1;padding-top:6px}
+.rm-phase{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.rm-name{font-size:14px;font-weight:800;margin-bottom:4px}
+.rm-desc{font-size:12px;color:var(--tx2);line-height:1.55;margin-bottom:6px}
+.rm-chips{display:flex;gap:5px;flex-wrap:wrap}
+.rm-chip{
+  font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;
+}
+.chip-orange{background:rgba(255,107,53,.12);color:var(--primary)}
+.chip-mint{background:rgba(0,212,170,.1);color:var(--accent)}
+.chip-purple{background:rgba(124,92,252,.1);color:var(--purple)}
+.chip-yellow{background:rgba(255,200,50,.1);color:#f5c518}
+.chip-blue{background:rgba(59,130,246,.1);color:#60a5fa}
+.rm-arrow{
+  text-align:center;font-size:16px;color:var(--tx3);
+  margin:-4px 0 -4px 22px;line-height:1;
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- 네비 -->
+<nav>
+  <div>
+    <div class="logo"><span class="logo-start">STARTUP</span><span class="logo-map">MAP</span></div>
+    <div class="logo-sub">창업지원사업 AI 진단</div>
+  </div>
+  <div class="nav-badge">무료 진단</div>
+</nav>
+
+<!-- ══ 랜딩 ══ -->
+<div id="landing">
+  <div class="hero">
+    <div class="hero-eyebrow">현직 창업지원사업 심사위원 노하우 반영</div>
+    <h1 class="hero-h1">내 아이템에 맞는<br><em>창업 지원금</em> 찾기<br></h1>
+    <p class="hero-sub">예비창업부터 7년차 스타트업까지<br>딱 맞는 정부지원사업을 3분 만에 찾아드립니다</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-val stat-v1">2,400+</div><div class="stat-label">등록 지원사업</div></div>
+      <div class="stat"><div class="stat-val stat-v2">89%</div><div class="stat-label">평균 통과율</div></div>
+      <div class="stat"><div class="stat-val stat-v3">무료</div><div class="stat-label">진단 비용</div></div>
+    </div>
+    <div class="hero-cta">
+      <button class="btn btn-primary btn-xl" onclick="startDiag()">🚀 무료로 지원금 찾기 →</button>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feat">
+      <div class="feat-icon feat-i1">🎯</div>
+      <div>
+        <div class="feat-title">아이템 기반 매칭</div>
+        <div class="feat-desc">업종이 아니라 내 아이템·기술 분야에 맞는 사업을 골라드립니다</div>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon feat-i2">⚡</div>
+      <div>
+        <div class="feat-title">실시간 최신 공고</div>
+        <div class="feat-desc">정부24·창업진흥원·TIPS 등 최신 공고를 실시간으로 분석합니다</div>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon feat-i3">📊</div>
+      <div>
+        <div class="feat-title">선정가능성 예측</div>
+        <div class="feat-desc">창업 단계·팀 구성·기술 수준을 반영한 맞춤 통과율을 제공합니다</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 앱 (진단 폼) ══ -->
+<div id="app">
+  <div class="progress">
+    <div class="prog-info">
+      <span id="stepLabel">창업 단계</span>
+      <span id="stepNum">1 / 5</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:20%"></div></div>
+  </div>
+
+  <!-- STEP 1: 창업 단계 -->
+  <div class="step active" id="s1">
+    <div class="step-label">STEP 01</div>
+    <div class="step-title">현재 창업 단계를 알려주세요</div>
+    <div class="step-hint">단계에 따라 신청 가능한 지원사업이 달라집니다</div>
+    <div class="choice-grid">
+      <div class="choice" onclick="selectChoice(this,'stage','pre')">
+        <div class="choice-icon">🌱</div>
+        <div class="choice-label">예비창업자</div>
+        <div class="choice-sub">아직 사업자 없음</div>
+      </div>
+      <div class="choice" onclick="selectChoice(this,'stage','early')">
+        <div class="choice-icon">🔥</div>
+        <div class="choice-label">초기창업</div>
+        <div class="choice-sub">창업 1년 미만</div>
+      </div>
+      <div class="choice" onclick="selectChoice(this,'stage','growth')">
+        <div class="choice-icon">📈</div>
+        <div class="choice-label">성장기</div>
+        <div class="choice-sub">1~3년차</div>
+      </div>
+      <div class="choice" onclick="selectChoice(this,'stage','scale')">
+        <div class="choice-icon">🚀</div>
+        <div class="choice-label">도약기</div>
+        <div class="choice-sub">3~7년차</div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-primary btn-xl" id="next1" onclick="goStep(2)" disabled>다음으로 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: 아이템 분야 -->
+  <div class="step" id="s2">
+    <div class="step-label">STEP 02</div>
+    <div class="step-title">아이템 분야를 선택해주세요</div>
+    <div class="step-hint">복수 선택 가능합니다</div>
+    <div class="choice-grid">
+      <div class="choice" onclick="toggleField(this,'it')">
+        <div class="choice-icon">💻</div>
+        <div class="choice-label">IT·소프트웨어</div>
+        <div class="choice-sub">앱·SaaS·플랫폼</div>
+      </div>
+      <div class="choice" onclick="toggleField(this,'hw')">
+        <div class="choice-icon">🔧</div>
+        <div class="choice-label">제조·하드웨어</div>
+        <div class="choice-sub">디바이스·부품</div>
+      </div>
+      <div class="choice" onclick="toggleField(this,'bio')">
+        <div class="choice-icon">🧬</div>
+        <div class="choice-label">바이오·헬스</div>
+        <div class="choice-sub">의료·제약·헬스케어</div>
+      </div>
+      <div class="choice" onclick="toggleField(this,'food')">
+        <div class="choice-icon">🍽️</div>
+        <div class="choice-label">푸드테크</div>
+        <div class="choice-sub">식품·외식·농업</div>
+      </div>
+      <div class="choice" onclick="toggleField(this,'content')">
+        <div class="choice-icon">🎨</div>
+        <div class="choice-label">콘텐츠·미디어</div>
+        <div class="choice-sub">엔터·게임·크리에이터</div>
+      </div>
+      <div class="choice" onclick="toggleField(this,'social')">
+        <div class="choice-icon">🌱</div>
+        <div class="choice-label">소셜임팩트</div>
+        <div class="choice-sub">ESG·사회적기업</div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goStep(1)">← 이전</button>
+      <button class="btn btn-primary" id="next2" onclick="goStep(3)" disabled style="flex:1">다음으로 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6(3번째): 아이템 소개 -->
+  <div class="step" id="s6">
+    <div class="step-label">STEP 03</div>
+    <div class="step-title">아이템을 간단히 소개해주세요</div>
+    <div class="step-hint">한두 줄로 어떤 문제를 해결하는지 써주시면 더 정확하게 매칭됩니다</div>
+    <div class="form-group">
+      <label class="form-label">어떤 아이템인가요?</label>
+      <textarea class="form-input" id="item-desc" rows="4"
+        placeholder="예: 소상공인 재고 관리를 자동화하는 AI SaaS 서비스입니다. 현재 MVP를 개발 중이고 베타 고객이 5개사 있습니다."
+        oninput="chkStep6()" style="resize:none;line-height:1.6"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">목표 고객은 누구인가요? <span style="color:var(--tx3);font-weight:400">(선택)</span></label>
+      <input type="text" class="form-input" id="item-target"
+        placeholder="예: 직원 5인 이하 소상공인, 30대 직장인, 중소 제조업체 등">
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goStep(2)">← 이전</button>
+      <button class="btn btn-primary" id="next6" onclick="goStep(4)" style="flex:1">다음으로 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: 기술 수준 -->
+  <div class="step" id="s3">
+    <div class="step-label">STEP 04</div>
+    <div class="step-title">현재 보유한 것을 선택해주세요</div>
+    <div class="step-hint">해당하는 것을 모두 선택해주세요 (없어도 괜찮아요)</div>
+    <div class="check-list">
+      <div class="check-item" onclick="toggleCheck(this,'patent')">
+        <div class="check-box"></div>
+        <div class="check-text">특허 / 지식재산권 보유</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'prototype')">
+        <div class="check-box"></div>
+        <div class="check-text">시제품 / MVP 완성</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'revenue')">
+        <div class="check-box"></div>
+        <div class="check-text">초기 매출 발생 (1억 미만)</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'team')">
+        <div class="check-box"></div>
+        <div class="check-text">공동창업자 / 핵심 팀원 있음</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'invest')">
+        <div class="check-box"></div>
+        <div class="check-text">투자 유치 경험 있음</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'none')">
+        <div class="check-box"></div>
+        <div class="check-text">없음 (해당 없음)</div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goStep(3)">← 이전</button>
+      <button class="btn btn-primary" id="next3" onclick="goStep(5)" style="flex:1">다음으로 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: 필요한 지원 -->
+  <div class="step" id="s4">
+    <div class="step-label">STEP 05</div>
+    <div class="step-title">가장 필요한 지원이 무엇인가요?</div>
+    <div class="step-hint">복수 선택 가능합니다</div>
+    <div class="check-list">
+      <div class="check-item" onclick="toggleCheck(this,'fund')">
+        <div class="check-box"></div>
+        <div class="check-text">💰 사업화 자금 (R&D·제품개발비)</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'mentor')">
+        <div class="check-box"></div>
+        <div class="check-text">🧑‍🏫 멘토링 / 액셀러레이팅</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'invest2')">
+        <div class="check-box"></div>
+        <div class="check-text">📈 투자 연계</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'global')">
+        <div class="check-box"></div>
+        <div class="check-text">🌏 글로벌 진출 지원</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'space')">
+        <div class="check-box"></div>
+        <div class="check-text">🏢 공간 / 장비 지원</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this,'market')">
+        <div class="check-box"></div>
+        <div class="check-text">📣 마케팅 / 판로 개척</div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goStep(4)">← 이전</button>
+      <button class="btn btn-primary" id="next4" onclick="goStep(6)" style="flex:1">다음으로 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: 기본 정보 -->
+  <div class="step" id="s5">
+    <div class="step-label">STEP 06</div>
+    <div class="step-title">기본 정보를 입력해주세요</div>
+    <div class="step-hint">진단 결과 발송 및 맞춤 안내를 위해 사용됩니다</div>
+    <div class="form-group">
+      <label class="form-label">이름 <span style="color:var(--tx3);font-weight:400">(선택)</span></label>
+      <input type="text" class="form-input" id="ui-name" placeholder="예: 홍길동" oninput="chkStep5()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">전화번호 <span style="color:var(--tx3);font-weight:400">(선택)</span></label>
+      <input type="tel" class="form-input" id="ui-phone" placeholder="010-0000-0000" oninput="chkStep5()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">이메일 <span style="color:var(--primary)">*</span> <span style="color:var(--tx3);font-size:12px;font-weight:400">필수 — 진단 결과를 이메일로 받아보세요</span></label>
+      <input type="email" class="form-input" id="ui-email" placeholder="example@company.com" oninput="chkStep5()">
+    </div>
+    <div class="agree-group" style="margin-bottom:20px">
+      <!-- 전체 동의 -->
+      <label class="agree-wrap agree-all">
+        <input type="checkbox" id="agree-all" onchange="toggleAllAgree(this)">
+        <span class="agree-text" style="color:var(--tx);font-weight:600">전체 동의하기 <span style="color:var(--tx3);font-weight:400">(필수·선택 포함)</span></span>
+      </label>
+      <!-- 필수 동의 -->
+      <div>
+        <label class="agree-wrap">
+          <input type="checkbox" id="agree-privacy" onchange="onAgreeChange()">
+          <span class="agree-text"><b style="color:var(--primary)">[필수]</b> 개인정보 수집·이용에 동의합니다</span>
+        </label>
+        <details class="agree-detail">
+          <summary>수집 항목·목적 자세히 보기</summary>
+          <div class="agree-detail-body">
+            · 수집 항목: 이름, 연락처, 이메일<br>
+            · 이용 목적: 진단 결과 제공 및 전문가 검토 서비스 안내<br>
+            · 보유 기간: 서비스 제공 완료 후 1년 (또는 삭제 요청 시까지)<br>
+            · 동의를 거부할 수 있으나, 거부 시 진단 결과를 받을 수 없습니다.
+          </div>
+        </details>
+      </div>
+      <!-- 선택 동의 -->
+      <div>
+        <label class="agree-wrap">
+          <input type="checkbox" id="agree-mkt" onchange="onAgreeChange()">
+          <span class="agree-text"><b style="color:var(--tx3)">[선택]</b> 광고성 정보 수신에 동의합니다 — 신규 지원사업·마감임박 알림</span>
+        </label>
+        <details class="agree-detail">
+          <summary>수신 안내 자세히 보기</summary>
+          <div class="agree-detail-body">
+            · 발송 내용: 신규 지원사업·마감임박·혜택 안내<br>
+            · 발송 수단: 이메일, 문자(SMS)<br>
+            · 미동의해도 진단 서비스는 정상 이용 가능하며, 언제든 수신 거부할 수 있습니다.
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goStep(5)">← 이전</button>
+      <button class="btn btn-primary" id="next5" onclick="startAnalysis()" disabled style="flex:1">🚀 지원금 찾기!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 로딩 ══ -->
+<div id="loading">
+  <div class="load-wrap">
+    <div class="rocket-anim">🚀</div>
+    <div class="load-title">AI가 분석 중입니다</div>
+    <div class="load-sub">내 아이템에 딱 맞는<br>창업 지원사업을 찾고 있어요</div>
+    <div class="load-steps">
+      <div class="load-step"><div class="load-step-icon">🔍</div>최신 창업 공고 스캔 중...</div>
+      <div class="load-step"><div class="load-step-icon">🎯</div>아이템 분야 매칭 중...</div>
+      <div class="load-step"><div class="load-step-icon">📊</div>선정가능성 계산 중...</div>
+    </div>
+    <div class="load-bar"><div class="load-fill"></div></div>
+  </div>
+</div>
+
+<!-- ══ 결과 ══ -->
+<div id="result">
+  <div class="result-header">
+    <div class="result-company" id="rCompany">주식회사 스타트업ABC</div>
+    <div class="result-meta" id="rMeta">2026. 6. 9 · AI 분석 완료 · IT·소프트웨어</div>
+    <div class="result-kpis">
+      <div class="kpi"><div class="kpi-val kv1" id="rTotal">5개</div><div class="kpi-label">추천 사업</div></div>
+      <div class="kpi"><div class="kpi-val kv2" id="rRate">82%</div><div class="kpi-label">예상 통과율</div></div>
+      <div class="kpi"><div class="kpi-val kv3" id="rAmt">3억원</div><div class="kpi-label">최대 수령</div></div>
+    </div>
+  </div>
+
+  <div class="result-summary" id="rSummary">
+    초기창업 IT 스타트업! 창업성장기술개발(디딤돌)과 TIPS 프로그램을 우선 노려보세요 🎯
+  </div>
+
+  <!-- 지원사업 샘플 -->
+  <div class="section-title">🎯 추천 지원사업 <span class="badge-count">TOP 5</span></div>
+
+  <div class="grant-card">
+    <div class="gc-top">
+      <div class="gc-rank">1</div>
+      <div class="gc-name">창업성장기술개발사업 (디딤돌)</div>
+      <div class="gc-right">
+        <div class="gc-amt">최대 1억원</div>
+        <div class="gc-prob prob-h">선정 높음</div>
+      </div>
+    </div>
+    <div class="gc-agency">중소벤처기업부 / 창업진흥원</div>
+    <div class="gc-desc">💡 초기창업 IT·제조 기업 R&D 자금 지원</div>
+    <div class="gc-meta">
+      <div class="gc-meta-item">마감 <span>2026.08.31</span></div>
+      <div class="gc-meta-item">경쟁률 <span>약 4:1</span></div>
+      <div class="gc-meta-item">자부담 <span>25%</span></div>
+    </div>
+    <div class="gc-tags">
+      <span class="gc-tag">창업 3년 이내</span>
+      <span class="gc-tag">R&D</span>
+      <span class="gc-tag">기술개발</span>
+    </div>
+  </div>
+
+  <div class="grant-card">
+    <div class="gc-top">
+      <div class="gc-rank">2</div>
+      <div class="gc-name">TIPS 프로그램 (민간투자주도형 기술창업)</div>
+      <div class="gc-right">
+        <div class="gc-amt">최대 5억원</div>
+        <div class="gc-prob prob-m">선정 보통</div>
+      </div>
+    </div>
+    <div class="gc-agency">중소벤처기업부 / TIPS 운영사</div>
+    <div class="gc-desc">💡 민간 투자 + 정부 R&D 매칭 지원</div>
+    <div class="gc-meta">
+      <div class="gc-meta-item">마감 <span>상시</span></div>
+      <div class="gc-meta-item">경쟁률 <span>약 8:1</span></div>
+      <div class="gc-meta-item">자부담 <span>0%</span></div>
+    </div>
+    <div class="gc-tags">
+      <span class="gc-tag">딥테크</span>
+      <span class="gc-tag">투자연계</span>
+      <span class="gc-tag">최대 5억</span>
+    </div>
+  </div>
+
+  <div class="grant-card">
+    <div class="gc-top">
+      <div class="gc-rank">3</div>
+      <div class="gc-name">초기창업패키지</div>
+      <div class="gc-right">
+        <div class="gc-amt">최대 1억원</div>
+        <div class="gc-prob prob-h">선정 높음</div>
+      </div>
+    </div>
+    <div class="gc-agency">중소벤처기업부 / 창업진흥원</div>
+    <div class="gc-desc">💡 창업 3년 이내 기업 사업화 자금 지원</div>
+    <div class="gc-meta">
+      <div class="gc-meta-item">마감 <span>2026.07.31</span></div>
+      <div class="gc-meta-item">경쟁률 <span>약 5:1</span></div>
+      <div class="gc-meta-item">자부담 <span>30%</span></div>
+    </div>
+    <div class="gc-tags">
+      <span class="gc-tag">창업 3년 이내</span>
+      <span class="gc-tag">사업화</span>
+      <span class="gc-tag">멘토링</span>
+    </div>
+  </div>
+
+  <div class="grant-card">
+    <div class="gc-top">
+      <div class="gc-rank">4</div>
+      <div class="gc-name">비대면 서비스 바우처</div>
+      <div class="gc-right">
+        <div class="gc-amt">최대 2,000만원</div>
+        <div class="gc-prob prob-m">선정 보통</div>
+      </div>
+    </div>
+    <div class="gc-agency">중소벤처기업부</div>
+    <div class="gc-desc">💡 클라우드·보안·AI 솔루션 구축비 지원</div>
+    <div class="gc-meta">
+      <div class="gc-meta-item">마감 <span>공고 확인</span></div>
+      <div class="gc-meta-item">경쟁률 <span>약 2.5:1</span></div>
+      <div class="gc-meta-item">자부담 <span>20%</span></div>
+    </div>
+    <div class="gc-tags">
+      <span class="gc-tag">디지털전환</span>
+      <span class="gc-tag">클라우드</span>
+      <span class="gc-tag">AI</span>
+    </div>
+  </div>
+
+  <div class="grant-card">
+    <div class="gc-top">
+      <div class="gc-rank">5</div>
+      <div class="gc-name">스타트업 글로벌 진출 지원</div>
+      <div class="gc-right">
+        <div class="gc-amt">최대 2,000만원</div>
+        <div class="gc-prob prob-l">선정 낮음</div>
+      </div>
+    </div>
+    <div class="gc-agency">KOTRA</div>
+    <div class="gc-desc">💡 해외 전시회·법인설립 비용 지원</div>
+    <div class="gc-meta">
+      <div class="gc-meta-item">마감 <span>공고 확인</span></div>
+      <div class="gc-meta-item">경쟁률 <span>약 2.8:1</span></div>
+      <div class="gc-meta-item">자부담 <span>20%</span></div>
+    </div>
+    <div class="gc-tags">
+      <span class="gc-tag">글로벌</span>
+      <span class="gc-tag">수출</span>
+      <span class="gc-tag">해외진출</span>
+    </div>
+  </div>
+
+  <!-- 점수 -->
+  <div class="section-title" style="margin-top:20px">📊 항목별 적합도</div>
+  <div class="score-box">
+    <div class="score-row">
+      <div class="score-label">아이템 적합</div>
+      <div class="score-bar"><div class="score-fill" style="width:88%"></div></div>
+      <div class="score-val">88</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">창업 단계</div>
+      <div class="score-bar"><div class="score-fill" style="width:82%"></div></div>
+      <div class="score-val">82</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">기술 보유</div>
+      <div class="score-bar"><div class="score-fill" style="width:75%"></div></div>
+      <div class="score-val">75</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">팀 구성</div>
+      <div class="score-bar"><div class="score-fill" style="width:70%"></div></div>
+      <div class="score-val">70</div>
+    </div>
+  </div>
+
+  <!-- 리스크 -->
+  <div class="section-title">⚡ 주의할 점</div>
+  <div class="risk-box">
+    <div class="risk-item risk-ok">
+      <div class="risk-icon">✅</div>
+      <div class="risk-content">
+        <div class="risk-title">MVP 보유로 가점 유리해요</div>
+        <div class="risk-desc">시제품·MVP를 보유한 기업은 대부분 창업 지원사업에서 가점을 받습니다</div>
+      </div>
+    </div>
+    <div class="risk-item risk-warn">
+      <div class="risk-icon">⚠️</div>
+      <div class="risk-content">
+        <div class="risk-title">사업계획서 준비가 핵심이에요</div>
+        <div class="risk-desc">창업 지원사업은 기술력보다 사업계획서 완성도로 당락이 갈립니다</div>
+      </div>
+    </div>
+    <div class="risk-item risk-warn">
+      <div class="risk-icon">⚠️</div>
+      <div class="risk-content">
+        <div class="risk-title">중복 지원 제한 확인 필수</div>
+        <div class="risk-desc">일부 창업 지원사업은 동시 수혜가 불가능합니다. 우선순위를 정해두세요</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 로드맵 -->
+  <div class="roadmap-wrap">
+    <div class="roadmap-title">🗺️ 추천 지원사업 로드맵 <span class="badge-count" id="rmBadge">맞춤 5단계</span></div>
+    <div class="roadmap" id="roadmapEl">
+      <!-- JS로 동적 생성 -->
+    </div>
+  </div>
+
+  <!-- 심사위원 체크리스트 -->
+  <div class="section-title" style="margin-top:4px">⚠️ 이것 없으면 합격 어렵습니다</div>
+  <div style="background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:20px">
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:14px;line-height:1.6">심사위원이 공통으로 확인하는 5가지 항목입니다.<br>솔직하게 체크해보세요.</div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="background:var(--card2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="font-size:16px;flex-shrink:0">🎯</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:3px">문제 정의가 명확한가?</div>
+            <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">"어떤 사람의 어떤 문제를 해결하는가" — 없으면 첫 페이지에서 탈락</div>
+            <div style="font-size:11px;font-weight:700;color:var(--primary)">→ 심사 1순위 탈락 요인</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--card2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="font-size:16px;flex-shrink:0">⚔️</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:3px">경쟁사 대비 차별점이 있는가?</div>
+            <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">"왜 우리 회사여야 하는가" — 없으면 심사위원 설득 불가</div>
+            <div style="font-size:11px;font-weight:700;color:var(--primary)">→ 가장 많이 탈락하는 항목</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--card2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="font-size:16px;flex-shrink:0">📊</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:3px">시장 규모 수치가 있는가?</div>
+            <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">TAM/SAM/SOM 또는 통계 출처 — 숫자 없으면 신뢰도 0</div>
+            <div style="font-size:11px;font-weight:700;color:var(--primary)">→ 수치 없는 계획서는 즉시 감점</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--card2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="font-size:16px;flex-shrink:0">👥</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:3px">팀의 실행력을 증명할 수 있는가?</div>
+            <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">대표자 이력·팀원 전문성 — 팀이 약하면 아이디어가 좋아도 탈락</div>
+            <div style="font-size:11px;font-weight:700;color:var(--primary)">→ 심사위원이 가장 중요하게 보는 항목</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--card2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="font-size:16px;flex-shrink:0">💰</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:3px">자금 사용 계획이 구체적인가?</div>
+            <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">OO에 OO만원 사용 예정 — 뭉뚱그린 계획서는 바로 감점</div>
+            <div style="font-size:11px;font-weight:700;color:var(--primary)">→ 구체성 없으면 신뢰 불가</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));border:1.5px solid rgba(255,107,53,.4);border-radius:var(--r);padding:24px;margin-bottom:20px;text-align:center">
+    <div style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1.5px;margin-bottom:10px">현직 창업지원사업 심사위원 1:1 진단</div>
+    <div style="font-size:20px;font-weight:900;line-height:1.4;margin-bottom:8px">
+      지원금 <span style="color:var(--accent)" id="ctaAmount">5,000만원</span> 받기 위해<br>
+      <span style="color:var(--primary)">2만원</span>만 투자하세요
+    </div>
+    <div style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:6px">
+      지원사업 정밀 코칭 · 심사위원 관점 코멘트 · 48시간 내 회신
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px">
+      <span style="font-size:13px;color:var(--tx3);text-decoration:line-through">정가 10만원</span>
+      <span style="background:var(--primary);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px">80% 할인</span>
+    </div>
+    <button class="btn btn-primary btn-xl" style="font-size:16px;padding:16px;letter-spacing:-.3px">
+      🔥 심사위원에게 사전 진단받기 →
+    </button>
+    <div style="font-size:11px;color:var(--tx3);margin-top:10px">⏰ 선착순 마감 · 만족 보장</div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:8px">
+    <button class="btn btn-ghost" onclick="resetDiag()" style="width:100%;padding:13px">🔄 다시 진단하기</button>
+  </div>
+</div>
+
+<script>
+
+/* ── 로드맵 생성 ── */
+function buildRoadmap(){
+  var stage = S.stage || 'early';
+  var assets = S.assets || [];
+  var hasPatent  = assets.indexOf('patent')>=0;
+  var hasProto   = assets.indexOf('prototype')>=0;
+  var hasRevenue = assets.indexOf('revenue')>=0;
+  var hasInvest  = assets.indexOf('invest')>=0;
+  var hasTeam    = assets.indexOf('team')>=0;
+
+  var steps = [];
+
+  if(stage==='pre'){
+    // 예비창업자
+    steps.push({icon:'🌱',cls:'rm-n1',phase:'지금 바로',name:'예비창업패키지 신청',desc:'창업 전 단계 최대 규모 지원금. 사업계획서 완성도가 핵심입니다.',chips:[{t:'최대 1억원',c:'chip-orange'},{t:'창업진흥원',c:'chip-mint'}]});
+    steps.push({icon:'📝',cls:'rm-n2',phase:'창업 직후',name:'법인 설립 + 사업자 등록',desc:'예비창업패키지 종료 후 바로 법인 설립. 창업 날짜가 이후 지원사업 기준이 됩니다.',chips:[{t:'필수 선행',c:'chip-purple'}]});
+    if(!hasPatent){
+      steps.push({icon:'🏆',cls:'rm-n3',phase:'창업 후 6개월 내',name:'특허 출원 지원',desc:'특허 보유 여부가 초기창업패키지·TIPS 심사의 핵심 가점. 지금 준비하세요.',chips:[{t:'최대 500만원',c:'chip-yellow'},{t:'특허청',c:'chip-blue'}]});
+    }
+    steps.push({icon:'🔬',cls:'rm-n3',phase:'창업 1년차 (예비창업패키지 종료 후)',name:'초기창업패키지 신청',desc:'예비창업패키지와 중복 수혜 불가. 종료 다음 해에 신청하세요.',chips:[{t:'최대 1억원',c:'chip-orange'},{t:'창업 3년 이내',c:'chip-mint'}]});
+    steps.push({icon:'🚀',cls:'rm-n4',phase:'시제품 완성 후',name:'TIPS 프로그램 도전',desc:'민간 투자 + 정부 R&D 매칭. 특허·시제품 보유 시 합격률 상승.',chips:[{t:'최대 5억원',c:'chip-purple'},{t:'투자 연계',c:'chip-orange'}]});
+
+  } else if(stage==='early'){
+    // 초기창업 (1년 미만)
+    if(!hasPatent){
+      steps.push({icon:'🏆',cls:'rm-n1',phase:'지금 바로 (병행 가능)',name:'특허 출원 지원',desc:'특허가 없으면 R&D·TIPS 심사에서 불리합니다. 먼저 출원하세요.',chips:[{t:'최대 500만원',c:'chip-yellow'},{t:'특허청',c:'chip-blue'}]});
+    }
+    if(!hasProto){
+      steps.push({icon:'🔬',cls:'rm-n2',phase:'지금 바로',name:'초기창업패키지 신청',desc:'MVP·시제품 개발 자금. 창업 3년 이내라면 지금이 골든타임.',chips:[{t:'최대 1억원',c:'chip-orange'},{t:'창업진흥원',c:'chip-mint'}]});
+    } else {
+      steps.push({icon:'🚀',cls:'rm-n2',phase:'지금 바로',name:'창업성장기술개발(디딤돌)',desc:'시제품이 있다면 R&D로 제품 고도화. 기술 완성도를 높이세요.',chips:[{t:'최대 1억원',c:'chip-orange'},{t:'R&D',c:'chip-purple'}]});
+    }
+    steps.push({icon:'💰',cls:'rm-n3',phase:'초기 매출 발생 후',name:'비대면 서비스 바우처',desc:'클라우드·AI·보안 인프라 구축 비용. 초기 운영비 절감에 효과적.',chips:[{t:'최대 2,000만원',c:'chip-mint'},{t:'디지털전환',c:'chip-blue'}]});
+    if(!hasInvest){
+      steps.push({icon:'📈',cls:'rm-n4',phase:'매출·특허 증명 후',name:'TIPS 프로그램 도전',desc:'투자사 추천 + 정부 R&D 매칭. 특허·매출이 있으면 합격률 상승.',chips:[{t:'최대 5억원',c:'chip-purple'},{t:'투자 연계',c:'chip-orange'}]});
+    }
+    steps.push({icon:'🌏',cls:'rm-n5',phase:'국내 시장 검증 후',name:'스타트업 글로벌 진출',desc:'KOTRA 바우처로 해외 전시·법인 설립 지원.',chips:[{t:'최대 2,000만원',c:'chip-yellow'},{t:'글로벌',c:'chip-blue'}]});
+
+  } else if(stage==='growth'){
+    // 성장기 1~3년
+    steps.push({icon:'📊',cls:'rm-n1',phase:'지금 바로',name:'중소기업 기술혁신개발',desc:'1~3년차 제품 고도화 타이밍. 정부 R&D로 기술 완성도를 높이세요.',chips:[{t:'최대 1.5억원',c:'chip-orange'},{t:'중기부',c:'chip-mint'}]});
+    if(!hasPatent){
+      steps.push({icon:'🏆',cls:'rm-n2',phase:'병행',name:'특허 기술사업화 지원',desc:'보유 기술을 특허로 보호하고 사업화 자금까지 받는 일석이조.',chips:[{t:'최대 1,500만원',c:'chip-yellow'},{t:'특허청',c:'chip-blue'}]});
+    }
+    if(!hasInvest){
+      steps.push({icon:'💼',cls:'rm-n3',phase:'매출 성장 후',name:'TIPS+ 스케일업',desc:'TIPS 수료 또는 투자 유치 기업 대상 후속 지원.',chips:[{t:'최대 10억원',c:'chip-purple'},{t:'투자연계',c:'chip-orange'}]});
+    }
+    steps.push({icon:'🌏',cls:'rm-n4',phase:'해외 준비',name:'수출 바우처',desc:'해외 마케팅·전시회·법인 설립 비용 바우처.',chips:[{t:'최대 1억원',c:'chip-mint'},{t:'KOTRA',c:'chip-blue'}]});
+
+  } else {
+    // 도약기 3~7년
+    steps.push({icon:'📈',cls:'rm-n1',phase:'지금 바로',name:'대형 R&D 과제 수주',desc:'3년차 이상은 중기부·산업부 대형 R&D 도전 가능. 기술력 공인 효과도 있습니다.',chips:[{t:'최대 5억원',c:'chip-orange'},{t:'R&D',c:'chip-purple'}]});
+    steps.push({icon:'🌏',cls:'rm-n2',phase:'병행',name:'글로벌 강소기업 육성',desc:'수출 실적 기반 글로벌 진출. KOTRA·무역보험공사 연계.',chips:[{t:'최대 3억원',c:'chip-mint'},{t:'수출',c:'chip-blue'}]});
+    steps.push({icon:'💼',cls:'rm-n3',phase:'규모화',name:'벤처확인·이노비즈 인증',desc:'코스닥 상장·대기업 납품을 위한 필수 인증. 세제혜택도 받을 수 있습니다.',chips:[{t:'인증',c:'chip-purple'},{t:'세제혜택',c:'chip-yellow'}]});
+    steps.push({icon:'🚀',cls:'rm-n4',phase:'도약',name:'WC300 프로젝트',desc:'월드클래스 300 선정 시 5년간 집중 지원. 글로벌 히든챔피언 목표.',chips:[{t:'최대 50억원',c:'chip-orange'},{t:'산업부',c:'chip-mint'}]});
+  }
+
+  var html = '';
+  steps.forEach(function(s, i){
+    html += '<div class="rm-step">'
+      + '<div class="rm-num '+s.cls+'">'+s.icon+'</div>'
+      + '<div class="rm-body">'
+      + '<div class="rm-phase">'+s.phase+'</div>'
+      + '<div class="rm-name">'+s.name+'</div>'
+      + '<div class="rm-desc">'+s.desc+'</div>'
+      + '<div class="rm-chips">'
+      + s.chips.map(function(c){return '<span class="rm-chip '+c.c+'">'+c.t+'</span>';}).join('')
+      + '</div></div></div>';
+    if(i < steps.length-1){
+      html += '<div class="rm-arrow">↓</div>';
+    }
+  });
+
+  document.getElementById('roadmapEl').innerHTML = html;
+
+  var badge = document.getElementById('rmBadge');
+  if(badge) badge.textContent = '맞춤 ' + steps.length + '단계';
+}
+
+function updateCtaAmount(){
+  // 샘플 카드에서 선정가능성 높음 중 최대 금액 추출
+  var cards = document.querySelectorAll('.grant-card');
+  var maxAmt = '';
+  var maxNum = 0;
+
+  cards.forEach(function(card){
+    var probEl = card.querySelector('.gc-prob');
+    var amtEl  = card.querySelector('.gc-amt');
+    if(!probEl || !amtEl) return;
+    var prob = probEl.textContent || '';
+    var amt  = amtEl.textContent  || '';
+    if(prob.indexOf('높음') < 0) return;
+
+    // 금액 숫자 추출 (억원, 만원 단위)
+    var num = 0;
+    var billMatch = amt.match(/([0-9,\.]+)\s*억원/);
+    var wonMatch  = amt.match(/([0-9,]+)\s*만원/);
+    if(billMatch) num = parseFloat(billMatch[1].replace(/,/g,'')) * 10000;
+    else if(wonMatch) num = parseInt(wonMatch[1].replace(/,/g,''));
+
+    if(num > maxNum){
+      maxNum = num;
+      maxAmt = amt.replace('최대 ','').trim();
+    }
+  });
+
+  // ctaAmount 업데이트
+  var el = document.getElementById('ctaAmount');
+  if(el && maxAmt) el.textContent = maxAmt;
+}
+
+var S = {stage:null, fields:[], assets:[], needs:[], company:'', phone:'', email:'', region:'', marketing:false};
+var stepLabels = ['창업 단계','아이템 분야','아이템 소개','보유 현황','필요 지원','기본 정보'];
+var stepIds = ['s1','s2','s6','s3','s4','s5'];
+
+function goStep(n){
+  document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');});
+  var el = document.getElementById(stepIds[n-1]);
+  if(el) el.classList.add('active');
+  document.getElementById('stepLabel').textContent = stepLabels[n-1];
+  document.getElementById('stepNum').textContent = n + ' / 6';
+  document.getElementById('progFill').style.width = Math.round(n/6*100) + '%';
+  window.scrollTo(0,0);
+}
+
+function startDiag(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').style.display='block';
+  goStep(1);
+}
+
+function selectChoice(el, key, val){
+  var parent = el.parentElement;
+  parent.querySelectorAll('.choice').forEach(function(c){c.classList.remove('selected');});
+  el.classList.add('selected');
+  S[key] = val;
+  if(key==='stage') document.getElementById('next1').disabled=false;
+}
+
+function toggleField(el, val){
+  el.classList.toggle('selected');
+  var idx = S.fields.indexOf(val);
+  if(idx>=0) S.fields.splice(idx,1); else S.fields.push(val);
+  document.getElementById('next2').disabled = S.fields.length===0;
+}
+
+function toggleCheck(el, val){
+  el.classList.toggle('selected');
+  // 어느 스텝인지 확인
+  var step = el.closest('.step');
+  if(step && step.id === 's4'){
+    var idx = S.needs.indexOf(val);
+    if(idx>=0) S.needs.splice(idx,1); else S.needs.push(val);
+  } else {
+    var idx2 = S.assets.indexOf(val);
+    if(idx2>=0) S.assets.splice(idx2,1); else S.assets.push(val);
+  }
+}
+
+function chkStep5(){
+  var e=document.getElementById('ui-email').value.trim();
+  var emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+  var privacyOk=document.getElementById('agree-privacy').checked;
+  document.getElementById('next5').disabled=!(emailOk && privacyOk);
+}
+
+// '전체 동의' 클릭 → 필수·선택 모두 반영
+function toggleAllAgree(el){
+  document.getElementById('agree-privacy').checked = el.checked;
+  document.getElementById('agree-mkt').checked = el.checked;
+  chkStep5();
+}
+
+// 개별 동의 변경 → '전체 동의' 상태 동기화 + 버튼 재검사
+function onAgreeChange(){
+  var p=document.getElementById('agree-privacy').checked;
+  var m=document.getElementById('agree-mkt').checked;
+  document.getElementById('agree-all').checked = (p && m);
+  chkStep5();
+}
+
+function chkStep6(){
+  var desc=document.getElementById('item-desc').value.trim();
+  document.getElementById('next6').disabled=desc.length<1;
+}
+
+function startAnalysis(){
+  S.name=document.getElementById('ui-name').value.trim();
+  S.itemDesc=document.getElementById('item-desc')?document.getElementById('item-desc').value.trim():'';
+  var phoneEl=document.getElementById('ui-phone');
+  S.phone=phoneEl?phoneEl.value.trim():'';
+  S.email=document.getElementById('ui-email').value.trim();
+  S.region='';
+  S.marketing=document.getElementById('agree-mkt').checked;
+  document.getElementById('app').style.display='none';
+  document.getElementById('loading').style.display='block';
+  setTimeout(function(){
+    document.getElementById('loading').style.display='none';
+    buildRoadmap();
+    updateCtaAmount();
+    document.getElementById('result').style.display='block';
+    window.scrollTo(0,0);
+  }, 11000);
+}
+
+function resetDiag(){
+  document.getElementById('result').style.display='none';
+  document.getElementById('landing').style.display='block';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
