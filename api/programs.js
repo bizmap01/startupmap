@@ -124,7 +124,7 @@ function buildClosed(list, cond, opts = {}) {
 }
 
 // ── ③ 대표 창업지원사업 (큐레이션, 금액 포함) : 단계 + 니즈 매칭 ──
-const KS_INTEGRATED = 'https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do?pbancClssCd=PBC010'; // 통합공고 목록
+const KS_INTEGRATED = 'https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do?pbancClssCd=PBC010&schM=view&pbancSn=175783'; // 통합공고(안 튕기는 링크)
 const FLAGSHIPS = [
   { title:'예비창업패키지',              org:'중소벤처기업부·창업진흥원', amount:'최대 1억원',  stages:['예비'],                 needs:['fund'],            kw:['예비창업패키지'],     desc:'예비창업자 사업화 자금·멘토링' },
   { title:'초기창업패키지',              org:'중소벤처기업부·창업진흥원', amount:'최대 1억원',  stages:['초기'],                 needs:['fund'],            kw:['초기창업패키지'],     desc:'3년 이내 창업기업 사업화 지원' },
