@@ -211,6 +211,8 @@ nav{
 .agree-text{font-size:12px;color:var(--tx2);line-height:1.5}
 .agree-group{display:flex;flex-direction:column;gap:10px}
 .grant-loading{text-align:center;color:var(--tx3);font-size:13px;padding:26px 10px}
+.region-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.region-chip{padding:15px 8px;text-align:center;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center}
 .gc-link{text-decoration:none;background:rgba(255,107,53,.14)!important;color:var(--primary)!important}
 .agree-all{border-color:var(--bd2)!important;background:var(--card2)!important}
 .agree-detail{margin-top:6px}
@@ -632,11 +634,46 @@ nav{
     </div>
   </div>
 
-  <!-- STEP 5: 기본 정보 -->
-  <div class="step" id="s5">
+  <!-- STEP 6: 창업 지역 -->
+  <div class="step" id="s7">
     <div class="step-label">STEP 06</div>
+    <div class="step-title">어느 지역에서 창업하세요?</div>
+    <div class="step-hint">선택한 지역 + 전국 공고를 맞춤으로 찾아드려요</div>
+    <div class="region-grid">
+      <div class="choice region-chip" onclick="selectChoice(this,'region','')">🇰🇷 전국</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','서울')">서울</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','경기')">경기</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','인천')">인천</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','부산')">부산</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','대구')">대구</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','광주')">광주</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','대전')">대전</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','울산')">울산</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','세종')">세종</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','강원')">강원</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','충북')">충북</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','충남')">충남</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','전북')">전북</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','전남')">전남</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','경북')">경북</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','경남')">경남</div>
+      <div class="choice region-chip" onclick="selectChoice(this,'region','제주')">제주</div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goStep(5)">← 이전</button>
+      <button class="btn btn-primary" id="next7" onclick="goStep(7)" disabled style="flex:1">다음으로 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 7: 기본 정보 -->
+  <div class="step" id="s5">
+    <div class="step-label">STEP 07</div>
     <div class="step-title">기본 정보를 입력해주세요</div>
     <div class="step-hint">진단 결과 발송 및 맞춤 안내를 위해 사용됩니다</div>
+    <div class="form-group">
+      <label class="form-label">기술명 또는 회사명 <span style="color:var(--primary)">*</span> <span style="color:var(--tx3);font-size:12px;font-weight:400">필수</span></label>
+      <input type="text" class="form-input" id="ui-company" placeholder="예: AI 물류 최적화 / 주식회사 스타트업" oninput="chkStep5()">
+    </div>
     <div class="form-group">
       <label class="form-label">이름 <span style="color:var(--tx3);font-weight:400">(선택)</span></label>
       <input type="text" class="form-input" id="ui-name" placeholder="예: 홍길동" oninput="chkStep5()">
@@ -688,7 +725,7 @@ nav{
       </div>
     </div>
     <div class="step-nav">
-      <button class="btn btn-ghost" onclick="goStep(5)">← 이전</button>
+      <button class="btn btn-ghost" onclick="goStep(6)">← 이전</button>
       <button class="btn btn-primary" id="next5" onclick="startAnalysis()" disabled style="flex:1">🚀 지원금 찾기!</button>
     </div>
   </div>
@@ -994,16 +1031,16 @@ function updateCtaAmount(){
 }
 
 var S = {stage:null, fields:[], assets:[], needs:[], company:'', phone:'', email:'', region:'', marketing:false};
-var stepLabels = ['창업 단계','아이템 분야','아이템 소개','보유 현황','필요 지원','기본 정보'];
-var stepIds = ['s1','s2','s6','s3','s4','s5'];
+var stepLabels = ['창업 단계','아이템 분야','아이템 소개','보유 현황','필요 지원','창업 지역','기본 정보'];
+var stepIds = ['s1','s2','s6','s3','s4','s7','s5'];
 
 function goStep(n){
   document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');});
   var el = document.getElementById(stepIds[n-1]);
   if(el) el.classList.add('active');
   document.getElementById('stepLabel').textContent = stepLabels[n-1];
-  document.getElementById('stepNum').textContent = n + ' / 6';
-  document.getElementById('progFill').style.width = Math.round(n/6*100) + '%';
+  document.getElementById('stepNum').textContent = n + ' / ' + stepIds.length;
+  document.getElementById('progFill').style.width = Math.round(n/stepIds.length*100) + '%';
   window.scrollTo(0,0);
 }
 
@@ -1019,6 +1056,7 @@ function selectChoice(el, key, val){
   el.classList.add('selected');
   S[key] = val;
   if(key==='stage') document.getElementById('next1').disabled=false;
+  if(key==='region') document.getElementById('next7').disabled=false;
 }
 
 function toggleField(el, val){
@@ -1042,10 +1080,12 @@ function toggleCheck(el, val){
 }
 
 function chkStep5(){
+  var comp=document.getElementById('ui-company').value.trim();
   var e=document.getElementById('ui-email').value.trim();
   var emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   var privacyOk=document.getElementById('agree-privacy').checked;
-  document.getElementById('next5').disabled=!(emailOk && privacyOk);
+  S.company=comp;
+  document.getElementById('next5').disabled=!(comp.length>=1 && emailOk && privacyOk);
 }
 
 // '전체 동의' 클릭 → 필수·선택 모두 반영
@@ -1083,6 +1123,15 @@ function startAnalysis(){
     buildRoadmap();
     updateCtaAmount();
     document.getElementById('result').style.display='block';
+    var rc=document.getElementById('rCompany');
+    if(rc) rc.textContent = S.company || '내 창업 진단';
+    var rm=document.getElementById('rMeta');
+    if(rm){
+      var today=new Date();
+      var dstr=today.getFullYear()+'. '+(today.getMonth()+1)+'. '+today.getDate();
+      var fieldsKo=(S.fields||[]).map(function(f){return FIELD_MAP[f]||f;}).join('·');
+      rm.textContent = dstr+' · AI 분석 완료'+(fieldsKo?(' · '+fieldsKo):'');
+    }
     renderPrograms();
     window.scrollTo(0,0);
   }, 11000);
@@ -1133,6 +1182,8 @@ function openCard(p){
 }
 
 function flagCard(p){
+  var pr=probOf(p.fit||70);
+  var scaleTag = p.scale ? '<span class="gc-tag" style="background:rgba(124,92,252,.15);color:#a48bff">'+esc(p.scale)+'</span>' : '';
   var tags=(p.reasons||[]).slice(0,2).map(function(r){return '<span class="gc-tag">'+esc(r)+'</span>';}).join('');
   return ''+
   '<div class="grant-card">'+
@@ -1140,13 +1191,13 @@ function flagCard(p){
       '<div class="gc-rank" style="background:linear-gradient(135deg,var(--purple),var(--accent))">★</div>'+
       '<div class="gc-name">'+esc(p.title)+'</div>'+
       '<div class="gc-right">'+
-        '<div class="gc-amt">'+esc(p.scale||'')+'</div>'+
-        '<div class="gc-prob" style="background:rgba(124,92,252,.15);color:#a48bff">대표사업</div>'+
+        '<div class="gc-amt">적합도 '+(p.fit||70)+'%</div>'+
+        '<div class="gc-prob '+pr.c+'">'+pr.t+'</div>'+
       '</div>'+
     '</div>'+
     '<div class="gc-agency">'+esc(p.org||'')+'</div>'+
     '<div class="gc-desc">💡 '+esc(p.desc||'')+'</div>'+
-    '<div class="gc-tags">'+tags+
+    '<div class="gc-tags">'+scaleTag+tags+
       '<a class="gc-tag gc-link" href="'+fixUrl(p.url)+'" target="_blank" rel="noopener">공고 보기 ↗</a>'+
     '</div>'+
   '</div>';
