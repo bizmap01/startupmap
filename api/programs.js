@@ -27,18 +27,21 @@ const NEED_KEYWORDS = {
   market: ['마케팅','판로','홍보','유통','판매','브랜드'],
   space:  ['공간','입주','시설','오피스','사무','코워킹','메이커스페이스','보육실'],
 };
-// 지역(시·도) → 제목/내용에서 지역색을 판별할 토큰
+// 지역(시·도) → 제목/기관명에서 지역색을 판별할 토큰
 const REGION_TOKENS = {
-  '서울':['서울'], '경기':['경기','수원','성남','용인','고양','부천','안양','화성','평택','안산'],
-  '인천':['인천'], '부산':['부산'], '대구':['대구'], '광주':['광주광역','광주시'], '대전':['대전'],
-  '울산':['울산'], '세종':['세종'], '강원':['강원','춘천','원주','강릉'],
-  '충북':['충북','청주','충청북'], '충남':['충남','천안','아산','충청남'],
-  '전북':['전북','전주','전라북'], '전남':['전남','여수','순천','목포','전라남'],
-  '경북':['경북','포항','경주','구미','경상북'], '경남':['경남','창원','김해','진주','경상남'],
+  '서울':['서울','강남구','강동구','서초','송파','마포','성동','영등포','종로','용산'],
+  '경기':['경기','수원','성남','용인','고양','부천','안양','화성','평택','안산','의정부','남양주','파주','김포','광명','군포','시흥','하남','이천','오산','구리','안성','포천','여주'],
+  '인천':['인천'], '부산':['부산'], '대구':['대구'], '광주':['광주광역','광주시','광주은'], '대전':['대전'],
+  '울산':['울산'], '세종':['세종'], '강원':['강원','춘천','원주','강릉','속초','동해','원주','평창'],
+  '충북':['충북','청주','충주','제천','충청북'], '충남':['충남','천안','아산','서산','당진','충청남'],
+  '전북':['전북','전주','군산','익산','전라북'], '전남':['전남','여수','순천','목포','광양','나주','전라남'],
+  '경북':['경북','포항','경주','구미','안동','경상북','칠곡'], '경남':['경남','창원','김해','진주','양산','거제','통영','경상남'],
   '제주':['제주'],
 };
+const NATIONWIDE_HINTS = ['전국','온라인','비대면','전지역','국내외'];
 function detectRegions(text){
   const t = text || ''; const found = new Set();
+  if (t.includes('수도권')) { found.add('서울'); found.add('경기'); found.add('인천'); }
   for (const [sido, toks] of Object.entries(REGION_TOKENS)) {
     for (const tk of toks) if (t.includes(tk)) { found.add(sido); break; }
   }
@@ -83,13 +86,15 @@ function scoreItem(p, cond, now = new Date()) {
   return { ...p, fit, daysLeft: dl, regionType: nationwide ? '전국' : '지역', reasons };
 }
 
-// 지역 필터: 특정지역 데이터면 내 지역만, '전국'이라도 제목에 다른 지역이 박혀 있으면 제외
+// 지역 필터: 특정지역 데이터면 내 지역만, '전국'이라도 제목·기관명에 다른 지역이 박혀 있으면 제외
 function regionOK(p, cond){
   if (!cond.region) return true;
   if (p.region && !p.region.includes('전국')) return p.region.includes(cond.region);
-  const found = detectRegions(`${p.title} ${p.target}`);
-  if (found.size === 0) return true;
-  return found.has(cond.region);
+  const hay = `${p.title} ${p.org} ${p.target}`;
+  if (NATIONWIDE_HINTS.some(function(h){ return hay.includes(h); })) return true; // 전국/온라인 명시 → 통과
+  const found = detectRegions(hay);
+  if (found.size === 0) return true;          // 지역색 없음 → 전국으로 인정
+  return found.has(cond.region);              // 특정 지역색 있으면 내 지역 포함 시만
 }
 
 function buildOpen(list, cond, opts = {}) {
