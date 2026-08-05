@@ -96,6 +96,7 @@ function scoreItem(p, cond, now = new Date()) {
 
   // 분야
   let fh=0; for(const f of (cond.fields||[])) fh += hits(hay, FIELD_KEYWORDS[f]||[f]);
+  const fieldMatched = fh>0;
   if (fh) { score += Math.min(28, fh*11); reasons.push('분야 적합'); }
 
   // 단계(키워드)
@@ -106,22 +107,23 @@ function scoreItem(p, cond, now = new Date()) {
   if (p.enyy) {
     const want = STAGE_ENYY[cond.stage] || [];
     if (want.some(function(w){ return p.enyy.includes(w); })) { score += 15; reasons.push('업력 적합'); }
-    else if (want.length) { score -= 12; } // 대상 업력 불일치 → 감점
+    else if (want.length) { score -= 12; }
   }
 
-  // 니즈(텍스트)
+  // 니즈(텍스트) — 흔한 행정용어는 이미 NEED_KEYWORDS에서 제외됨
   let nh=0; for(const n of (cond.needs||[])) nh += hits(hay, NEED_KEYWORDS[n]||[]);
-  // A-2 니즈(지원분야 코드)
   let ch=0; for(const n of (cond.needs||[])) ch += hits(p.field, NEED_CLSFC[n]||[]);
-  if (nh || ch) { score += Math.min(28, nh*8 + ch*8); reasons.push('필요항목 적합'); }
+  if (nh || ch) { score += Math.min(24, nh*7 + ch*8); reasons.push('필요항목 적합'); }
 
-  // 공간/입주형인데 '공간' 니즈가 없으면 감점
+  // 공간/입주형인데 '공간' 니즈 없으면 감점
   if (hits(hay, NEED_KEYWORDS.space) > 0 && !(cond.needs||[]).includes('space')) score -= 22;
 
-  // B-5 아이템 소개 연관
+  // B-5 아이템 소개 연관 — 가점 + 게이트
   if (cond.itemKw && cond.itemKw.length) {
     let ih=0; for(const k of cond.itemKw) if (hay.includes(k)) ih++;
-    if (ih) { score += Math.min(15, ih*5); reasons.push('아이템 연관'); }
+    if (ih) { score += Math.min(18, ih*6); reasons.push('아이템 연관'); }
+    // 게이트: 아이템 키워드가 하나도 안 겹치고 분야도 안 맞으면 신뢰도 급감
+    else if (!fieldMatched) { score -= 30; }
   }
 
   // A-4 창업자 대상 아닌 공고 감점
@@ -132,7 +134,7 @@ function scoreItem(p, cond, now = new Date()) {
   const nationwide = !p.region || p.region.includes('전국');
   if (cond.region && p.region && p.region.includes(cond.region)) { score += 5; reasons.push('지역 적합'); }
 
-  const fit = Math.max(25, Math.min(99, Math.round(score)));
+  const fit = Math.max(20, Math.min(99, Math.round(score)));
   return { ...p, fit, daysLeft: dl, regionType: nationwide ? '전국' : '지역', reasons };
 }
 
@@ -260,8 +262,8 @@ module.exports = async function handler(req, res) {
     region: q.region || '',
     itemDesc: q.item || '',
   };
-  // B-5 아이템 소개 → 의미있는 키워드 추출
-  var _stop = new Set(['그리고','기반','서비스','플랫폼','기술','사업','창업','기업','스타트업','통해','위한','있는','하는','및','등','저희','우리','관련','제공','개발','활용']);
+  // B-5 아이템 소개 → 변별력 있는 키워드만 추출 (흔한 행정·비즈니스 용어 제거)
+  var _stop = new Set(['그리고','기반','서비스','기술','사업','사업화','창업','기업','스타트업','통해','위한','있는','하는','및','등','저희','우리','관련','제공','개발','활용','지원','지원사업','지원금','관리','모집','운영','대상','선정','참여','프로그램','지역','국내','분야','확대','강화','육성','발굴','구축','플랫폼앱','솔루션','시스템','비즈니스','아이템']);
   cond.itemKw = String(cond.itemDesc||'').split(/[^가-힣A-Za-z0-9]+/).filter(function(w){ return w.length>=2 && !_stop.has(w); }).slice(0,12);
   try {
     if (q.mock === '1' || (!process.env.DATA_GO_KR_API_KEY && q.live !== '1')) {
