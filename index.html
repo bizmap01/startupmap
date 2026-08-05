@@ -1248,7 +1248,8 @@ function renderPrograms(){
   var stageKo = STAGE_MAP[S.stage] || '';
   var fieldsKo = (S.fields||[]).map(function(f){return FIELD_MAP[f]||f;}).join(',');
   var needs = (S.needs||[]).join(',');
-  var qs='stage='+encodeURIComponent(stageKo)+'&fields='+encodeURIComponent(fieldsKo)+'&needs='+encodeURIComponent(needs)+'&region='+encodeURIComponent(S.region||'');
+  var item = S.itemDesc || '';
+  var qs='stage='+encodeURIComponent(stageKo)+'&fields='+encodeURIComponent(fieldsKo)+'&needs='+encodeURIComponent(needs)+'&region='+encodeURIComponent(S.region||'')+'&item='+encodeURIComponent(item);
   openBox.innerHTML='<div class="grant-loading">공고를 불러오는 중…</div>';
   closedBox.innerHTML=''; flagBox.innerHTML='';
   fetch('/api/programs?'+qs)
