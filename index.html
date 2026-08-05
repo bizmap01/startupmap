@@ -763,7 +763,7 @@ nav{
   </div>
 
   <!-- 지원사업 샘플 -->
-  <div class="section-title">🎯 현재 접수 가능한 사업 <span class="badge-count">실시간 공고</span></div>
+  <div class="section-title">🎯 현재 접수 가능한 사업 <span class="badge-count">실시간 공고 기준 맞춤 추천</span></div>
   <div id="openList"><div class="grant-loading">공고를 불러오는 중…</div></div>
 
   <div class="section-title" style="margin-top:22px">📁 최근 마감된 지원사업 <span class="badge-count">참고</span></div>
@@ -899,7 +899,7 @@ nav{
   <div style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));border:1.5px solid rgba(255,107,53,.4);border-radius:var(--r);padding:24px;margin-bottom:20px;text-align:center">
     <div style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1.5px;margin-bottom:10px">현직 창업지원사업 심사위원 1:1 진단</div>
     <div style="font-size:20px;font-weight:900;line-height:1.4;margin-bottom:8px">
-      지원금 <span style="color:var(--accent)" id="ctaAmount">5,000만원</span> 받기 위해<br>
+      지원금 <span style="color:var(--accent)" id="ctaAmount">1억원</span> 받기 위해<br>
       <span style="color:var(--primary)">2만원</span>만 투자하세요
     </div>
     <div style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:6px">
@@ -1028,9 +1028,7 @@ function updateCtaAmount(){
     }
   });
 
-  // ctaAmount 업데이트
-  var el = document.getElementById('ctaAmount');
-  if(el && maxAmt) el.textContent = maxAmt;
+  // ctaAmount 고정(1억원) — 자동 변경 안 함
 }
 
 var S = {stage:null, fields:[], assets:[], needs:[], company:'', phone:'', email:'', region:'', marketing:false};
@@ -1221,9 +1219,12 @@ function closedCard(p){
 function flagCard(p){
   var pr=probOf(p.fit||70);
   var amtTag = p.amount ? '<span class="gc-tag" style="background:rgba(124,92,252,.15);color:#a48bff">'+esc(p.amount)+'</span>' : '';
+  var statusTag = p.openNow
+    ? '<span class="gc-tag" style="background:rgba(0,212,170,.15);color:var(--accent)">접수중</span>'
+    : '<span class="gc-tag" style="background:rgba(74,85,104,.3);color:var(--tx2)">접수마감/예정</span>';
   var tags=(p.reasons||[]).slice(0,2).map(function(r){return '<span class="gc-tag">'+esc(r)+'</span>';}).join('');
   return ''+
-  '<div class="grant-card">'+
+  '<div class="grant-card"'+(p.openNow?'':' style="opacity:.85"')+'>'+
     '<div class="gc-top">'+
       '<div class="gc-rank" style="background:linear-gradient(135deg,var(--purple),var(--accent))">★</div>'+
       '<div class="gc-name">'+esc(p.title)+'</div>'+
@@ -1234,8 +1235,8 @@ function flagCard(p){
     '</div>'+
     '<div class="gc-agency">'+esc(p.org||'')+'</div>'+
     '<div class="gc-desc">💡 '+esc(p.desc||'')+'</div>'+
-    '<div class="gc-tags">'+amtTag+tags+
-      '<a class="gc-tag gc-link" href="'+fixUrl(p.url)+'" target="_blank" rel="noopener">공고 보기 ↗</a>'+
+    '<div class="gc-tags">'+statusTag+amtTag+tags+
+      '<a class="gc-tag gc-link" href="'+fixUrl(p.url)+'" target="_blank" rel="noopener">'+(p.openNow?'공고 보기 ↗':'통합공고 확인 ↗')+'</a>'+
     '</div>'+
   '</div>';
 }
