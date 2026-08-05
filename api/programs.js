@@ -44,12 +44,15 @@ function pickFlagships(cond, topN = 3) {
     if (f.stages.includes(cond.stage)) { s += 10; why.push('단계 적합'); }
     const need = (cond.needs || []).filter(n => f.needs.includes(n));
     if (need.length) { s += need.length * 8; why.push('필요항목 적합'); }
-    return { ...f, _score: s, why };
+    // 분야 힌트(설명/제목)로 소폭 가산
+    let fh = 0; for (const fld of (cond.fields||[])) fh += hits(`${f.title} ${f.desc}`, FIELD_KEYWORDS[fld]||[fld]);
+    if (fh) s += Math.min(6, fh*3);
+    const fit = Math.max(60, Math.min(97, 60 + s * 2)); // 대표사업은 60~97% 범위
+    return { ...f, _score: s, fit, why };
   });
-  // 점수 높은 순, 동점이면 원래 순서 유지
   scored.sort((a, b) => b._score - a._score);
   return scored.slice(0, topN).map(f => ({
-    title: f.title, org: f.org, scale: f.scale, desc: f.desc,
+    title: f.title, org: f.org, scale: f.scale, desc: f.desc, fit: f.fit,
     reasons: f.why.length ? f.why : ['대표 사업'], url: KS,
   }));
 }
