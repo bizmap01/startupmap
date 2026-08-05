@@ -752,9 +752,9 @@ nav{
     <div class="result-company" id="rCompany">주식회사 스타트업ABC</div>
     <div class="result-meta" id="rMeta">2026. 6. 9 · AI 분석 완료 · IT·소프트웨어</div>
     <div class="result-kpis">
-      <div class="kpi"><div class="kpi-val kv1" id="rTotal">5개</div><div class="kpi-label">추천 사업</div></div>
-      <div class="kpi"><div class="kpi-val kv2" id="rRate">82%</div><div class="kpi-label">예상 통과율</div></div>
-      <div class="kpi"><div class="kpi-val kv3" id="rAmt">3억원</div><div class="kpi-label">최대 수령</div></div>
+      <div class="kpi"><div class="kpi-val kv1" id="rTotal">-</div><div class="kpi-label">추천 사업</div></div>
+      <div class="kpi"><div class="kpi-val kv2" id="rRate">-</div><div class="kpi-label">최고 적합도</div></div>
+      <div class="kpi"><div class="kpi-val kv3" id="rAmt">-</div><div class="kpi-label">접수 가능</div></div>
     </div>
   </div>
 
@@ -766,8 +766,8 @@ nav{
   <div class="section-title">🎯 현재 접수 가능한 사업 <span class="badge-count">실시간 공고</span></div>
   <div id="openList"><div class="grant-loading">공고를 불러오는 중…</div></div>
 
-  <div class="section-title" style="margin-top:22px">⭐ 대표 창업지원사업 <span class="badge-count">맞춤 추천</span></div>
-  <div id="flagList"></div>
+  <div class="section-title" style="margin-top:22px">📁 최근 마감된 지원사업 <span class="badge-count">참고</span></div>
+  <div id="closedList"></div>
 
   <!-- 점수 -->
   <div class="section-title" style="margin-top:20px">📊 항목별 적합도</div>
@@ -1132,6 +1132,13 @@ function startAnalysis(){
       var fieldsKo=(S.fields||[]).map(function(f){return FIELD_MAP[f]||f;}).join('·');
       rm.textContent = dstr+' · AI 분석 완료'+(fieldsKo?(' · '+fieldsKo):'');
     }
+    var rs=document.getElementById('rSummary');
+    if(rs){
+      var stageTxt=STAGE_MAP[S.stage]||'';
+      var fTxt=(S.fields||[]).map(function(f){return FIELD_MAP[f]||f;}).join('·');
+      var regionTxt = S.region ? (S.region+' 지역') : '전국';
+      rs.textContent = stageTxt+' '+(fTxt?fTxt+' ':'')+'창업기업이시군요! '+regionTxt+' 기준으로 조건에 맞는 지원사업을 찾았어요 🎯';
+    }
     renderPrograms();
     window.scrollTo(0,0);
   }, 11000);
@@ -1181,23 +1188,26 @@ function openCard(p){
   '</div>';
 }
 
-function flagCard(p){
-  var pr=probOf(p.fit||70);
-  var scaleTag = p.scale ? '<span class="gc-tag" style="background:rgba(124,92,252,.15);color:#a48bff">'+esc(p.scale)+'</span>' : '';
-  var tags=(p.reasons||[]).slice(0,2).map(function(r){return '<span class="gc-tag">'+esc(r)+'</span>';}).join('');
+function closedCard(p){
+  var pr=probOf(p.fit||50);
+  var tags=(p.reasons||[]).slice(0,3).map(function(r){return '<span class="gc-tag">'+esc(r)+'</span>';}).join('');
   return ''+
-  '<div class="grant-card">'+
+  '<div class="grant-card" style="opacity:.82">'+
     '<div class="gc-top">'+
-      '<div class="gc-rank" style="background:linear-gradient(135deg,var(--purple),var(--accent))">★</div>'+
-      '<div class="gc-name">'+esc(p.title)+'</div>'+
+      '<div class="gc-rank" style="background:linear-gradient(135deg,#4a5568,#2d3748)">'+p.rank+'</div>'+
+      '<div class="gc-name">'+esc(p.title||'')+'</div>'+
       '<div class="gc-right">'+
-        '<div class="gc-amt">적합도 '+(p.fit||70)+'%</div>'+
+        '<div class="gc-amt">적합도 '+(p.fit||50)+'%</div>'+
         '<div class="gc-prob '+pr.c+'">'+pr.t+'</div>'+
       '</div>'+
     '</div>'+
     '<div class="gc-agency">'+esc(p.org||'')+'</div>'+
-    '<div class="gc-desc">💡 '+esc(p.desc||'')+'</div>'+
-    '<div class="gc-tags">'+scaleTag+tags+
+    '<div class="gc-meta">'+
+      '<div class="gc-meta-item">접수 마감 <span>'+fmtDate(p.endDt)+'</span></div>'+
+      '<div class="gc-meta-item">지역 <span>'+esc(p.region||'전국')+'</span></div>'+
+    '</div>'+
+    '<div class="gc-tags">'+
+      '<span class="gc-tag" style="background:rgba(74,85,104,.3);color:var(--tx2)">마감됨</span>'+tags+
       '<a class="gc-tag gc-link" href="'+fixUrl(p.url)+'" target="_blank" rel="noopener">공고 보기 ↗</a>'+
     '</div>'+
   '</div>';
@@ -1205,23 +1215,28 @@ function flagCard(p){
 
 function renderPrograms(){
   var openBox=document.getElementById('openList');
-  var flagBox=document.getElementById('flagList');
-  if(!openBox||!flagBox) return;
+  var closedBox=document.getElementById('closedList');
+  if(!openBox||!closedBox) return;
   var stageKo = STAGE_MAP[S.stage] || '';
   var fieldsKo = (S.fields||[]).map(function(f){return FIELD_MAP[f]||f;}).join(',');
   var needs = (S.needs||[]).join(',');
   var qs='stage='+encodeURIComponent(stageKo)+'&fields='+encodeURIComponent(fieldsKo)+'&needs='+encodeURIComponent(needs)+'&region='+encodeURIComponent(S.region||'');
   openBox.innerHTML='<div class="grant-loading">공고를 불러오는 중…</div>';
-  flagBox.innerHTML='';
+  closedBox.innerHTML='';
   fetch('/api/programs?'+qs)
     .then(function(r){ return r.json(); })
     .then(function(data){
       var open=(data && data.open) || [];
-      var flag=(data && data.flagship) || [];
+      var closed=(data && data.closed) || [];
       openBox.innerHTML = open.length ? open.map(openCard).join('')
-        : '<div class="grant-loading">지금 접수 중인 맞춤 공고가 없어요. 아래 대표 사업을 확인해 보세요.</div>';
-      flagBox.innerHTML = flag.map(flagCard).join('');
-      var t=document.getElementById('rTotal'); if(t) t.textContent=(open.length+flag.length)+'개';
+        : '<div class="grant-loading">지금 조건에 맞는 접수중 공고가 없어요. 아래 최근 마감 공고를 참고해 보세요.</div>';
+      closedBox.innerHTML = closed.length ? closed.map(closedCard).join('')
+        : '<div class="grant-loading">최근 마감된 공고가 없어요.</div>';
+      // KPI 갱신
+      var maxFit = open.reduce(function(m,p){return Math.max(m,p.fit||0);},0);
+      var t=document.getElementById('rTotal'); if(t) t.textContent=(open.length+closed.length)+'개';
+      var rt=document.getElementById('rRate'); if(rt) rt.textContent=(maxFit||'-')+(maxFit?'%':'');
+      var ra=document.getElementById('rAmt'); if(ra) ra.textContent=open.length+'건';
     })
     .catch(function(){
       openBox.innerHTML='<div class="grant-loading">공고를 불러오지 못했어요. (배포된 사이트에서 확인해 주세요)</div>';
