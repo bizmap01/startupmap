@@ -114,6 +114,7 @@ function buildClosed(list, cond, opts = {}) {
   return list.map(normalize)
     .map(p => ({ p, dl: daysLeft(p.endDt, now) }))
     .filter(x => x.dl != null && x.dl < 0 && x.dl >= -31) // 최근 1개월(31일) 이내 마감
+    .filter(x => regionOK(x.p, cond))                     // 지역 필터 (내 지역 + 전국)
     .map(x => scoreItem({ ...x.p, open:false }, cond, now))
     .sort((a, b) => (b.fit - a.fit) || (parseDt(b.endDt)-parseDt(a.endDt))) // 적합도순, 동점이면 최근 마감
     .slice(0, opts.topN || 3)
@@ -123,19 +124,30 @@ function buildClosed(list, cond, opts = {}) {
 }
 
 // ── ③ 대표 창업지원사업 (큐레이션, 금액 포함) : 단계 + 니즈 매칭 ──
+const KS_INTEGRATED = 'https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do?pbancClssCd=PBC010'; // 통합공고 목록
 const FLAGSHIPS = [
-  { title:'예비창업패키지',              org:'중소벤처기업부·창업진흥원', amount:'최대 1억원',  stages:['예비'],                 needs:['fund'],            desc:'예비창업자 사업화 자금·멘토링' },
-  { title:'초기창업패키지',              org:'중소벤처기업부·창업진흥원', amount:'최대 1억원',  stages:['초기'],                 needs:['fund'],            desc:'3년 이내 창업기업 사업화 지원' },
-  { title:'창업도약패키지',              org:'중소벤처기업부·창업진흥원', amount:'최대 3억원',  stages:['성장기','도약기'],       needs:['fund','market'],   desc:'3~7년 도약기 사업화·성장 지원' },
-  { title:'창업성장기술개발사업(디딤돌)',org:'중소벤처기업부',            amount:'최대 1.2억원',stages:['예비','초기','성장기'],  needs:['fund'],            desc:'창업기업 R&D 자금 지원' },
-  { title:'창업성장기술개발사업(전략형)',org:'중소벤처기업부',            amount:'최대 6억원',  stages:['성장기','도약기'],       needs:['fund'],            desc:'성장기 기업 전략형 R&D' },
-  { title:'TIPS 프로그램',              org:'중소벤처기업부·TIPS 운영사', amount:'최대 5억원',  stages:['초기','성장기','도약기'], needs:['invest2'],         desc:'민간투자 주도형 기술창업 R&D' },
-  { title:'창업사관학교',                org:'중소벤처기업부·창업진흥원', amount:'최대 1억원',  stages:['초기','성장기'],         needs:['mentor','space'],  desc:'유망 창업자 집중 보육·사업화' },
-  { title:'IP나래 프로그램',             org:'특허청·한국발명진흥회',      amount:'IP 전략 컨설팅', stages:['예비','초기','성장기','도약기'], needs:['mentor'],   desc:'창업기업 지식재산 전략 컨설팅' },
-  { title:'아기유니콘200',              org:'중소벤처기업부',            amount:'최대 3억원+', stages:['도약기'],               needs:['invest2','global'],desc:'유망 스타트업 스케일업·글로벌' },
-  { title:'글로벌 창업사관학교',         org:'중소벤처기업부·창업진흥원', amount:'글로벌 진출 지원', stages:['초기','성장기'],     needs:['global'],          desc:'글로벌 지향 창업기업 육성' },
+  { title:'예비창업패키지',              org:'중소벤처기업부·창업진흥원', amount:'최대 1억원',  stages:['예비'],                 needs:['fund'],            kw:['예비창업패키지'],     desc:'예비창업자 사업화 자금·멘토링' },
+  { title:'초기창업패키지',              org:'중소벤처기업부·창업진흥원', amount:'최대 1억원',  stages:['초기'],                 needs:['fund'],            kw:['초기창업패키지'],     desc:'3년 이내 창업기업 사업화 지원' },
+  { title:'창업도약패키지',              org:'중소벤처기업부·창업진흥원', amount:'최대 3억원',  stages:['성장기','도약기'],       needs:['fund','market'],   kw:['창업도약패키지','도약패키지'], desc:'3~7년 도약기 사업화·성장 지원' },
+  { title:'창업성장기술개발사업(디딤돌)',org:'중소벤처기업부',            amount:'최대 1.2억원',stages:['예비','초기','성장기'],  needs:['fund'],            kw:['디딤돌','창업성장기술개발'], desc:'창업기업 R&D 자금 지원' },
+  { title:'창업성장기술개발사업(전략형)',org:'중소벤처기업부',            amount:'최대 6억원',  stages:['성장기','도약기'],       needs:['fund'],            kw:['전략형','창업성장기술개발'], desc:'성장기 기업 전략형 R&D' },
+  { title:'TIPS 프로그램',              org:'중소벤처기업부·TIPS 운영사', amount:'최대 5억원',  stages:['초기','성장기','도약기'], needs:['invest2'],         kw:['TIPS','팁스'],        desc:'민간투자 주도형 기술창업 R&D' },
+  { title:'창업사관학교',                org:'중소벤처기업부·창업진흥원', amount:'최대 1억원',  stages:['초기','성장기'],         needs:['mentor','space'],  kw:['창업사관학교','청년창업사관학교'], desc:'유망 창업자 집중 보육·사업화' },
+  { title:'IP나래 프로그램',             org:'특허청·한국발명진흥회',      amount:'IP 전략 컨설팅', stages:['예비','초기','성장기','도약기'], needs:['mentor'],   kw:['IP나래','아이피나래'], desc:'창업기업 지식재산 전략 컨설팅' },
+  { title:'아기유니콘200',              org:'중소벤처기업부',            amount:'최대 3억원+', stages:['도약기'],               needs:['invest2','global'],kw:['아기유니콘'],         desc:'유망 스타트업 스케일업·글로벌' },
+  { title:'글로벌 창업사관학교',         org:'중소벤처기업부·창업진흥원', amount:'글로벌 진출 지원', stages:['초기','성장기'],     needs:['global'],          kw:['글로벌 창업사관학교','글로벌창업사관학교'], desc:'글로벌 지향 창업기업 육성' },
 ];
-function pickFlagships(cond, topN = 3) {
+// 실시간 접수공고에서 대표사업을 찾아 접수상태/링크 판정
+function matchOpenStatus(f, annOpen){
+  for (const raw of (annOpen || [])) {
+    const nm = String(raw.biz_pbanc_nm || raw.intg_pbanc_biz_nm || '');
+    if (f.kw.some(function(k){ return nm.includes(k); })) {
+      return { openNow:true, url: raw.detl_pg_url || KS_INTEGRATED, endDt: raw.pbanc_rcpt_end_dt || '' };
+    }
+  }
+  return { openNow:false, url: KS_INTEGRATED, endDt:'' };
+}
+function pickFlagships(cond, annOpen, topN = 3) {
   const scored = FLAGSHIPS.map(f => {
     let s = 0; const why = [];
     if (f.stages.includes(cond.stage)) { s += 10; why.push('단계 적합'); }
@@ -147,10 +159,15 @@ function pickFlagships(cond, topN = 3) {
     return { ...f, _score: s, fit, why };
   });
   scored.sort((a, b) => b._score - a._score);
-  return scored.slice(0, topN).map(f => ({
-    title: f.title, org: f.org, amount: f.amount, desc: f.desc, fit: f.fit,
-    reasons: f.why.length ? f.why : ['대표 사업'], url: KS,
-  }));
+  return scored.slice(0, topN).map(f => {
+    const st = matchOpenStatus(f, annOpen);
+    return {
+      title: f.title, org: f.org, amount: f.amount, desc: f.desc, fit: f.fit,
+      status: st.openNow ? '접수중' : '접수마감/예정',
+      openNow: st.openNow, endDt: st.endDt,
+      reasons: f.why.length ? f.why : ['대표 사업'], url: st.url,
+    };
+  });
 }
 
 // ── 개발용 샘플 ──
@@ -196,7 +213,7 @@ module.exports = async function handler(req, res) {
     if (q.mock === '1' || (!process.env.DATA_GO_KR_API_KEY && q.live !== '1')) {
       return res.status(200).json({ source:'mock', cond,
         open: buildOpen(MOCK_OPEN, cond, {topN:5}), closed: buildClosed(MOCK_CLOSED, cond, {topN:3}),
-        flagship: pickFlagships(cond, 3) });
+        flagship: pickFlagships(cond, MOCK_OPEN, 3) });
     }
     const [annOpen, annClosed] = await Promise.all([
       callKStartup('getAnnouncementInformation01', { perPage: 300, extra: { rcrt_prgs_yn: 'Y' } }),
@@ -206,13 +223,13 @@ module.exports = async function handler(req, res) {
     const open = buildOpen(annOpen, cond, { topN: 5 });
     const closed = buildClosed(annClosed, cond, { topN: 3 });
     res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate');
-    return res.status(200).json({ source:'k-startup', cond, open, closed, flagship: pickFlagships(cond, 3) });
+    return res.status(200).json({ source:'k-startup', cond, open, closed, flagship: pickFlagships(cond, annOpen, 3) });
   } catch (e) {
     const msg = String(e.message || e);
     const hint =
       msg === 'NO_KEY' ? 'Vercel 환경변수 DATA_GO_KR_API_KEY 를 설정하세요.' :
       msg.startsWith('UPSTREAM') ? '키/활용신청/IP/호출한도를 확인하세요.' :
       msg.startsWith('NOT_JSON') ? 'returnType/파라미터를 확인하세요.' : '';
-    return res.status(200).json({ source:'error', cond, open: [], closed: [], flagship: pickFlagships(cond, 3), warn: msg, hint });
+    return res.status(200).json({ source:'error', cond, open: [], closed: [], flagship: pickFlagships(cond, [], 3), warn: msg, hint });
   }
 };
