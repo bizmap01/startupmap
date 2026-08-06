@@ -1153,6 +1153,30 @@ function resetDiag(){
 // ── 진단 코드 → API가 쓰는 한글 라벨 ──
 var STAGE_MAP = { pre:'예비', early:'초기', growth:'성장기', scale:'도약기' };
 var FIELD_MAP = { it:'IT', hw:'제조', bio:'바이오', food:'푸드테크', content:'콘텐츠', social:'소셜' };
+var NEEDS_MAP = { fund:'자금', mentor:'멘토링', invest2:'투자', global:'글로벌', space:'공간', market:'마케팅' };
+
+// 진단 데이터를 구글시트로 저장 (앱스스크립트 웹앱)
+var SHEET_WEBAPP = 'https://script.google.com/macros/s/AKfycbw-ZsMpnjE6OWoGBZU89Jk8POwt_LXn5wGTd41lQskQCCMmBoFLZWNXGqeIIVVHcIX-/exec';
+var _saved = false;
+function saveToSheet(programsText){
+  if(_saved) return; _saved = true; // 중복 저장 방지
+  try{
+    var payload = {
+      company:  S.company||'',
+      email:    S.email||'',
+      phone:    S.phone||'',
+      stage:    STAGE_MAP[S.stage]||'',
+      fields:   (S.fields||[]).map(function(f){return FIELD_MAP[f]||f;}).join(', '),
+      region:   S.region||'전국',
+      itemDesc: S.itemDesc||'',
+      needs:    (S.needs||[]).map(function(n){return NEEDS_MAP[n]||n;}).join(', '),
+      marketing:!!S.marketing,
+      programs: programsText||''
+    };
+    fetch(SHEET_WEBAPP, { method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload) });
+  }catch(e){}
+}
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function fmtDate(d){ var x=String(d||'').replace(/[^0-9]/g,''); return x.length>=8 ? x.slice(0,4)+'.'+x.slice(4,6)+'.'+x.slice(6,8) : '공고 확인'; }
@@ -1267,9 +1291,14 @@ function renderPrograms(){
       var t=document.getElementById('rTotal'); if(t) t.textContent=(open.length+flag.length)+'개';
       var rt=document.getElementById('rRate'); if(rt) rt.textContent=(maxFit||'-')+(maxFit?'%':'');
       var ra=document.getElementById('rAmt'); if(ra) ra.textContent=open.length+'건';
+      // 구글시트 저장 (접수공고 + 대표사업 제목·적합도)
+      var progText = open.map(function(p){return '['+p.fit+'%] '+p.title;})
+        .concat(flag.map(function(p){return '★ '+p.title;})).join(' / ');
+      saveToSheet(progText);
     })
     .catch(function(){
       openBox.innerHTML='<div class="grant-loading">공고를 불러오지 못했어요. (배포된 사이트에서 확인해 주세요)</div>';
+      saveToSheet(''); // 공고 실패해도 리드는 저장
     });
 }
 </script>
