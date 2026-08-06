@@ -188,6 +188,7 @@ const FLAGSHIPS = [
   { title:'IP나래 프로그램',             org:'특허청·한국발명진흥회',      amount:'IP 전략 컨설팅', stages:['예비','초기','성장기','도약기'], needs:['mentor'],   kw:['IP나래','아이피나래'], desc:'창업기업 지식재산 전략 컨설팅' },
   { title:'아기유니콘200',              org:'중소벤처기업부',            amount:'최대 3억원+', stages:['도약기'],               needs:['invest2','global'],kw:['아기유니콘'],         desc:'유망 스타트업 스케일업·글로벌' },
   { title:'글로벌 창업사관학교',         org:'중소벤처기업부·창업진흥원', amount:'글로벌 진출 지원', stages:['초기','성장기'],     needs:['global'],          kw:['글로벌 창업사관학교','글로벌창업사관학교'], desc:'글로벌 지향 창업기업 육성' },
+  { title:'창업중심대학',                org:'중소벤처기업부·창업중심대학', amount:'최대 1억원',  stages:['예비','초기','성장기','도약기'], needs:['fund'],   kw:['창업중심대학'],       desc:'예비~7년 이내 창업기업 사업화 자금 지원' },
 ];
 // 실시간 접수공고에서 대표사업을 찾아 접수상태/링크 판정
 function matchOpenStatus(f, annOpen){
@@ -200,14 +201,15 @@ function matchOpenStatus(f, annOpen){
   return { openNow:false, url: KS_INTEGRATED, endDt:'' };
 }
 function pickFlagships(cond, annOpen, topN = 3) {
-  const scored = FLAGSHIPS.map(f => {
-    let s = 0; const why = [];
-    if (f.stages.includes(cond.stage)) { s += 10; why.push('단계 적합'); }
+  const scored = FLAGSHIPS
+    .filter(f => !cond.stage || f.stages.includes(cond.stage)) // 단계 안 맞으면 제외
+    .map(f => {
+    let s = 0; const why = ['단계 적합'];
     const need = (cond.needs || []).filter(n => f.needs.includes(n));
     if (need.length) { s += need.length * 8; why.push('필요항목 적합'); }
     let fh = 0; for (const fld of (cond.fields||[])) fh += hits(`${f.title} ${f.desc}`, FIELD_KEYWORDS[fld]||[fld]);
     if (fh) s += Math.min(6, fh*3);
-    const fit = Math.max(60, Math.min(97, 60 + s * 2));
+    const fit = Math.max(70, Math.min(97, 74 + s * 2));
     return { ...f, _score: s, fit, why };
   });
   scored.sort((a, b) => b._score - a._score);
@@ -217,7 +219,7 @@ function pickFlagships(cond, annOpen, topN = 3) {
       title: f.title, org: f.org, amount: f.amount, desc: f.desc, fit: f.fit,
       status: st.openNow ? '접수중' : '접수마감/예정',
       openNow: st.openNow, endDt: st.endDt,
-      reasons: f.why.length ? f.why : ['대표 사업'], url: st.url,
+      reasons: f.why, url: st.url,
     };
   });
 }
