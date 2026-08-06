@@ -1291,9 +1291,10 @@ function renderPrograms(){
       var t=document.getElementById('rTotal'); if(t) t.textContent=(open.length+flag.length)+'개';
       var rt=document.getElementById('rRate'); if(rt) rt.textContent=(maxFit||'-')+(maxFit?'%':'');
       var ra=document.getElementById('rAmt'); if(ra) ra.textContent=open.length+'건';
-      // 구글시트 저장 (접수공고 + 대표사업 제목·적합도)
-      var progText = open.map(function(p){return '['+p.fit+'%] '+p.title;})
-        .concat(flag.map(function(p){return '★ '+p.title;})).join(' / ');
+      // 구글시트 저장 (접수공고 + 대표사업, 번호·줄바꿈 정리)
+      var openText = open.map(function(p,i){return (i+1)+'. ['+p.fit+'%] '+p.title;}).join('\n');
+      var flagText = flag.map(function(p,i){return (i+1)+'. '+p.title;}).join('\n');
+      var progText = '[접수 가능]\n' + (openText||'없음') + '\n\n[대표 창업지원사업]\n' + (flagText||'없음');
       saveToSheet(progText);
     })
     .catch(function(){
